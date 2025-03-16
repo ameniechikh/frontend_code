@@ -1,13 +1,28 @@
 import { useState, useEffect } from "react";
-import { Bell, Mail, Search, CheckCircle, LogOut, Settings, X } from "lucide-react";  // Assure-toi d'importer Settings
+import { Bell, Mail, Search, CheckCircle, LogOut, Settings, X } from "lucide-react";
 import { useRouter } from "next/router";
 
-const Header = ({ socket, notifications = [], messages = [] }) => {
+interface Notification {
+  message: string;
+}
+
+interface Message {
+  sender: string;
+  text: string;
+  time: string;
+}
+
+interface HeaderProps {
+  socket?: any;
+  notifications?: Notification[];
+  messages?: Message[];
+}
+
+const Header: React.FC<HeaderProps> = ({ socket, notifications = [], messages = [] }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
   const [unreadNotifs, setUnreadNotifs] = useState(notifications.length);
   const [unreadMessages, setUnreadMessages] = useState(messages.length);
 
@@ -20,22 +35,22 @@ const Header = ({ socket, notifications = [], messages = [] }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!socket) return;  // Vérifie si socket est défini avant d'ajouter les événements
+    if (!socket) return;
 
-    // Écoute des notifications en temps réel
-    socket.on("newNotification", (notif) => {
-      setUnreadNotifs((prev) => prev + 1); // Incrémente le nombre de notifications non lues
-    });
+    const handleNewNotification = (notif: Notification) => {
+      setUnreadNotifs((prev) => prev + 1);
+    };
 
-    // Écoute des messages en temps réel
-    socket.on("newMessage", (msg) => {
-      setUnreadMessages((prev) => prev + 1); // Incrémente le nombre de messages non lus
-    });
+    const handleNewMessage = (msg: Message) => {
+      setUnreadMessages((prev) => prev + 1);
+    };
 
-    // Nettoyage des événements lors du démontage du composant
+    socket.on("newNotification", handleNewNotification);
+    socket.on("newMessage", handleNewMessage);
+
     return () => {
-      socket.off("newNotification");
-      socket.off("newMessage");
+      socket.off("newNotification", handleNewNotification);
+      socket.off("newMessage", handleNewMessage);
     };
   }, [socket]);
 
@@ -43,34 +58,17 @@ const Header = ({ socket, notifications = [], messages = [] }) => {
     router.push("/login");
   };
 
-  const openSettings = () => {
-    setSettingsOpen(true);
-    setMenuOpen(false);
-  };
-
-  const handleSaveSettings = (e) => {
-    e.preventDefault();
-    setSettingsOpen(false);
-  };
-
   return (
     <header className="bg-[add8e6] shadow-md p-4 flex justify-between items-center relative">
-      {/* 🔍 Barre de recherche */}
       <div className="relative">
         <Search className="absolute left-3 top-2.5 text-black-500" />
         <input type="text" placeholder="Rechercher..." className="pl-10 p-2 border rounded w-80" />
       </div>
 
-      {/* 🔔 Notifications et 📩 Messages */}
       <div className="flex items-center space-x-6">
-        {/* 🔔 Icône Notifications */}
         <div className="relative">
           <Bell className="text-black-600 cursor-pointer w-6 h-6" onClick={() => setNotifOpen(!notifOpen)} />
-          {unreadNotifs > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
-              {unreadNotifs}
-            </span>
-          )}
+          {unreadNotifs > 0 && <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">{unreadNotifs}</span>}
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-64 bg-white shadow-md rounded p-2">
               <h3 className="font-bold mb-2">🔔 Notifications</h3>
@@ -88,14 +86,9 @@ const Header = ({ socket, notifications = [], messages = [] }) => {
           )}
         </div>
 
-        {/* 📩 Icône Messages */}
         <div className="relative">
-          <Mail className="text-black-600 cursor-pointer w-6 h-6" onClick={() => setMessageOpen(!messageOpen)} />
-          {unreadMessages > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
-              {unreadMessages}
-            </span>
-          )}
+          <Mail className="text-gray-600 cursor-pointer w-6 h-6" onClick={() => setMessageOpen(!messageOpen)} />
+          {unreadMessages > 0 && <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">{unreadMessages}</span>}
           {messageOpen && (
             <div className="absolute right-0 mt-2 w-64 bg-white shadow-md rounded p-2">
               <h3 className="font-bold mb-2">📩 Messages</h3>
@@ -113,55 +106,7 @@ const Header = ({ socket, notifications = [], messages = [] }) => {
             </div>
           )}
         </div>
-
-        {/* 👤 Menu utilisateur */}
-        <div className="relative">
-          <img
-            src='00.jpg'
-            alt="User"
-            className="w-10 h-10 rounded-full cursor-pointer"
-            onClick={() => setMenuOpen(!menuOpen)}
-          />
-          {menuOpen && (
-            <div className="absolute right-0 mt-2 bg-white shadow-md rounded p-2 w-48">
-              <div className="p-2 border-b">
-                <p className="font-bold">{userInfo.name}</p>
-                <p className="text-xs text-gray-500">{userInfo.email}</p>
-              </div>
-              <p className="cursor-pointer p-2 hover:bg-gray-200 flex items-center" onClick={openSettings}>
-                <Settings className="w-4 h-4 mr-2" /> Paramètres
-              </p>
-              <p className="cursor-pointer p-2 hover:bg-gray-200 flex items-center text-red-600" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" /> Déconnexion
-              </p>
-            </div>
-          )}
-        </div>
       </div>
-
-      {/* ⚙️ Modale Paramètres */}
-      {settingsOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded shadow-md w-96">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">Modifier le profil</h2>
-              <X className="cursor-pointer" onClick={() => setSettingsOpen(false)} />
-            </div>
-            <form onSubmit={handleSaveSettings}>
-              <label className="block mb-2">Nom :</label>
-              <input type="text" className="border p-2 w-full mb-4" defaultValue={userInfo.name} />
-
-              <label className="block mb-2">Email :</label>
-              <input type="email" className="border p-2 w-full mb-4" defaultValue={userInfo.email} />
-
-              <label className="block mb-2">Photo :</label>
-              <input type="file" className="border p-2 w-full mb-4" />
-
-              <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Enregistrer</button>
-            </form>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
