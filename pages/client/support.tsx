@@ -162,7 +162,7 @@ const Support = () => {
 
         {/* Footer Fixe en Bas */}
         <div className="bg-white border-t">
-          <Footer />
+         
         </div>
       </div>
     </div>

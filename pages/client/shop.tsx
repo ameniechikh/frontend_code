@@ -116,7 +116,7 @@ const Shop = () => {
         </main>
 
         {/* Footer Fixé en Bas */}
-        <Footer />
+      
       </div>
     </div>
   );

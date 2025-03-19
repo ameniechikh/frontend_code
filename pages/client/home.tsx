@@ -208,9 +208,9 @@ const Home = () => {
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t p-4">
-          <Footer />
-        </footer>
+       
+          
+        
       </div>
     </div>
   );
