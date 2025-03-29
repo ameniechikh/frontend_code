@@ -1,57 +1,27 @@
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
-import { FaCheckCircle, FaExclamationTriangle, FaCog, FaSearch } from "react-icons/fa";
+import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 
 const Alertes = () => {
   const alertes = [
-    {
-      id: 1,
-      type: "Retard de Production",
-      source: "Ligne 3",
-      priorite: "🔴 Haute",
-      message: "Retard de 2h sur le plan de production",
-      dateHeure: "2023-10-25 14:30",
-      statut: "Non Résolue",
-      actions: ["Vérifier", "Reporter"]
-    },
-    {
-      id: 2,
-      type: "Panne Machine",
-      source: "Presse Hydraulique",
-      priorite: "🔴 Haute",
-      message: "Défaillance du moteur principal",
-      dateHeure: "2023-10-25 10:15",
-      statut: "En Cours",
-      actions: ["Maintenance"]
-    },
-    {
-      id: 3,
-      type: "Stock Critique",
-      source: "Matière Première A",
-      priorite: "🟠 Moyenne",
-      message: "Stock ≤ 50 unités (seuil : 100)",
-      dateHeure: "2023-10-25 09:00",
-      statut: "Résolue",
-      actions: ["Commander"]
-    },
-    {
-      id: 4,
-      type: "Défaut Qualité",
-      source: "Produit XYZ",
-      priorite: "🟡 Basse",
-      message: "5% de défauts détectés en contrôle",
-      dateHeure: "2023-10-24 16:45",
-      statut: "Enquête",
-      actions: ["Analyser"]
-    }
+    { id: 1, type: "Retard de Production", source: "Ligne 3", priorite: "🔴 Haute", message: "Retard de 2h sur le plan de production", dateHeure: "2023-10-25 14:30", statut: "Non Résolue", actions: ["Vérifier", "Reporter"] },
+    { id: 2, type: "Panne Machine", source: "Presse Hydraulique", priorite: "🔴 Haute", message: "Défaillance du moteur principal", dateHeure: "2023-10-25 10:15", statut: "En Cours", actions: ["Maintenance"] },
+    { id: 3, type: "Stock Critique", source: "Matière Première A", priorite: "🟠 Moyenne", message: "Stock ≤ 50 unités (seuil : 100)", dateHeure: "2023-10-25 09:00", statut: "Résolue", actions: ["Commander"] },
+    { id: 4, type: "Défaut Qualité", source: "Produit XYZ", priorite: "🟡 Basse", message: "5% de défauts détectés en contrôle", dateHeure: "2023-10-24 16:45", statut: "Enquête", actions: ["Analyser"] }
   ];
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
+    <div className="flex min-h-screen">
+      {/* Sidebar qui suit le scroll */}
+      <div className="w-64 sticky top-0 h-full">
+        <Sidebar />
+      </div>
+
+      {/* Contenu principal */}
       <div className="flex-1 flex flex-col">
         <Header />
+
         <main className="p-6 bg-gray-100 flex-1">
           <h1 className="text-2xl font-bold mb-4">🚨 Gestion des Alertes</h1>
 
@@ -109,6 +79,7 @@ const Alertes = () => {
             </div>
           </div>
         </main>
+
         <Footer />
       </div>
     </div>

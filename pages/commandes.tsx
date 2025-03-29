@@ -1,7 +1,6 @@
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
-import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { useState } from "react";
 
 const Commandes = () => {
@@ -12,11 +11,19 @@ const Commandes = () => {
   ]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex bg-gray-100 min-h-screen">
+      {/* Sidebar qui descend avec la page */}
+      <div className="w-64">
+        <Sidebar />
+      </div>
+
+      {/* Contenu principal */}
+      <div className="flex-1 flex flex-col">
+        {/* Header fixé en haut */}
         <Header />
-        <main className="p-6 overflow-auto">
+
+        {/* Contenu qui pousse le footer vers le bas */}
+        <main className="p-6 flex-grow">
           <h1 className="text-2xl font-bold mb-4">📑 Gestion des Commandes</h1>
           <div className="bg-white p-4 rounded shadow overflow-auto">
             <table className="w-full border-collapse">
@@ -51,6 +58,8 @@ const Commandes = () => {
             </table>
           </div>
         </main>
+
+        {/* Footer en bas */}
         <Footer />
       </div>
     </div>

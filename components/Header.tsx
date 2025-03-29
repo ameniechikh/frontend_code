@@ -68,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ socket, notifications = [], messages = 
   };
 
   return (
-    <header className="bg-[#add8e6] shadow-md p-4 flex justify-between items-center relative">
+    <header className=" bg-white shadow-md p-4 flex justify-between items-center relative">
       <div className="relative">
         <Search className="absolute left-3 top-2.5 text-black-500" />
         <input type="text" placeholder="Rechercher..." className="pl-10 p-2 border rounded w-80" />

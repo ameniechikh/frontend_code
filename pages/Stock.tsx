@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
 const Stock = () => {
-  // Données initiales des stocks avec 10 exemples
+  // Données initiales des stocks
   const [stocks, setStocks] = useState([
     { id: "STK-001", produit: "Acier", quantite: 500, statut: "Disponible" },
     { id: "STK-002", produit: "Aluminium", quantite: 200, statut: "Faible" },
@@ -43,11 +43,19 @@ const Stock = () => {
   };
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar flottante qui descend avec la page */}
+      <div className="w-64 absolute left-0 top-0 h-full">
+        <Sidebar />
+      </div>
+
+      {/* Contenu principal avec marge à gauche pour la sidebar */}
+      <div className="flex-1 flex flex-col ml-64">
+        {/* Header */}
         <Header />
-        <main className="p-6 bg-gray-100 flex-1">
+
+        {/* Contenu */}
+        <main className="p-6 flex-1">
           <h1 className="text-2xl font-bold mb-4">📦 Gestion des Stocks</h1>
 
           <div className="bg-white p-6 rounded-lg shadow mb-6">
@@ -120,6 +128,8 @@ const Stock = () => {
             </div>
           )}
         </main>
+
+        {/* Footer */}
         <Footer />
       </div>
     </div>
