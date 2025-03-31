@@ -29,7 +29,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-ocean shadow-md p-4 flex justify-between items-center">
+    <header className="bg-green-100 shadow-md p-4 flex justify-between items-center">
       <div className="relative">
         <Search className="absolute left-3 top-2.5 text-gray-500" />
         <input type="text" placeholder="Rechercher..." className="pl-10 p-2 border rounded w-80" />
