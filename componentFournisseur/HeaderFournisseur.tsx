@@ -41,14 +41,8 @@ const HeaderFournisseur = () => {
   };
 
   return (
-    <header className="bg-gray-800 text-white shadow-md p-4 flex justify-between items-center">
-      {/* Logo */}
-      <div className="flex items-center space-x-3">
-        <Factory size={28} className="text-yellow-400" />
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-300 to-gray-500">
-          SteelFlow Pro
-        </h1>
-      </div>
+    <header className="bg-gray-50 text-black shadow-md p-4 flex justify-between items-center">
+    
 
       {/* Barre de recherche */}
       <div className="relative w-96">
@@ -56,7 +50,7 @@ const HeaderFournisseur = () => {
         <input
           type="text"
           placeholder="Rechercher matière première, N° commande..."
-          className="pl-10 p-2 border rounded w-full bg-gray-700 text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          className="pl-10 p-2 border rounded w-full bg-black-700 text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
         />
       </div>
 

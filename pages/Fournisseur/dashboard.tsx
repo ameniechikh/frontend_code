@@ -1,128 +1,227 @@
 import { useState } from "react";
-import { Line } from "react-chartjs-2"; // Importation du graphique
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import { Line, Bar } from "react-chartjs-2";
+import { 
+  Chart as ChartJS, 
+  CategoryScale, 
+  LinearScale, 
+  PointElement, 
+  LineElement, 
+  BarElement, 
+  Title, 
+  Tooltip, 
+  Legend 
+} from "chart.js";
+import { Truck, Euro, Clock, Package, X } from "lucide-react";
+
+// Composants personnalisés
 import SidebarFournisseur from "../../componentFournisseur/SidebarFournisseur";
 import HeaderFournisseur from "../../componentFournisseur/HeaderFournisseur";
-import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
+import { 
+  Card, 
+  CardHeader, 
+  CardContent, 
+  CardTitle 
+} from "../../componentFournisseur/card";
 
-// Enregistrement des composants Chart.js
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const DashboardFournisseur = () => {
   const [alerts, setAlerts] = useState([
-    { id: 1, type: "danger", message: "⚠️ ALERTE - Stock critique de Coke Métallurgique (12T restants)" },
-    { id: 2, type: "success", message: "✅ CONFIRMÉ - Livraison #4587 acceptée par ArcelorMittal" },
+    { id: 1, type: "danger", message: "Stock critique de Coke Métallurgique (12T restants)" },
+    { id: 2, type: "success", message: "Livraison #4587 acceptée par ArcelorMittal" },
   ]);
 
-  // Données du graphique
-  const data = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], // Mois
+  const lineChartData = {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
       {
         label: "Commandes Honorées",
-        data: [100, 120, 80, 150, 130, 170], // Données pour les commandes honorées
-        borderColor: "rgba(75, 192, 192, 1)",
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        data: [100, 120, 80, 150, 130, 170],
+        borderColor: "rgb(59, 130, 246)",
+        backgroundColor: "rgba(59, 130, 246, 0.2)",
         fill: true,
+        tension: 0.4,
       },
       {
         label: "Retards",
-        data: [10, 20, 15, 30, 25, 35], // Données pour les retards
-        borderColor: "rgba(255, 99, 132, 1)",
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        data: [10, 20, 15, 30, 25, 35],
+        borderColor: "rgb(239, 68, 68)",
+        backgroundColor: "rgba(239, 68, 68, 0.2)",
         fill: true,
+        tension: 0.4,
       },
     ],
   };
 
-  const options = {
+  const barChartData = {
+    labels: ["Coke", "Minerai Fer", "Charbon", "Calcaire"],
+    datasets: [{
+      label: "Ventes Mensuelles (T)",
+      data: [65, 59, 80, 81],
+      backgroundColor: [
+        'rgba(59, 130, 246, 0.8)',
+        'rgba(52, 211, 153, 0.8)',
+        'rgba(251, 191, 36, 0.8)',
+        'rgba(239, 68, 68, 0.8)'
+      ],
+      borderWidth: 0
+    }]
+  };
+
+  const chartOptions = {
     responsive: true,
     plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Commandes honorées vs retards (6 derniers mois)",
-      },
+      legend: { position: "top" },
+      title: { display: true, text: "Performances des Commandes" }
     },
+    maintainAspectRatio: false
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <SidebarFournisseur />
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar Fixée */}
+      <div className="fixed h-screen w-64 z-50">
+        <SidebarFournisseur />
+      </div>
 
       {/* Contenu Principal */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
+      <div className="ml-64">
         <HeaderFournisseur />
 
-        {/* Contenu Dashboard */}
-        <main className="p-6 bg-gray-100 overflow-auto flex-1">
-          <h1 className="text-3xl font-bold mb-6">📊 Dashboard Fournisseur Opérationnel</h1>
+        <main className="p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Tableau de Bord Opérationnel</h1>
+            <span className="text-sm text-gray-500">Mis à jour il y a 5 min</span>
+          </div>
 
-          {/* Alertes Personnalisées */}
-          {alerts.length > 0 && (
-            <div className="mb-6">
-              {alerts.map((alert) => (
-                <div key={alert.id} className={`p-3 rounded mb-2 ${alert.type === "danger" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
-                  {alert.message}
+          <div className="grid gap-3">
+            {alerts.map(alert => (
+              <div 
+                key={alert.id} 
+                className={`p-4 rounded-lg flex items-center justify-between shadow-sm ${
+                  alert.type === 'danger' 
+                    ? 'bg-red-50 border-l-4 border-red-400' 
+                    : 'bg-green-50 border-l-4 border-green-400'
+                }`}
+              >
+                <div className="flex items-center">
+                  <div className={`flex-shrink-0 ${alert.type === 'danger' ? 'text-red-400' : 'text-green-400'}`}>
+                    {alert.type === 'danger' ? '⚠️' : '✅'}
+                  </div>
+                  <p className="ml-3 text-sm font-medium">{alert.message}</p>
                 </div>
-              ))}
-            </div>
-          )}
+                <button 
+                  onClick={() => setAlerts(a => a.filter(item => item.id !== alert.id))}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            ))}
+          </div>
 
-          {/* KPI - Statistiques */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>📦 Commandes en cours</CardTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Commandes en cours</CardTitle>
+                <Package className="h-6 w-6 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-blue-600">12</p>
+                <div className="text-3xl font-bold">12</div>
+                <p className="text-xs text-muted-foreground">+2.5% vs mois dernier</p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>🚛 Livraisons cette semaine</CardTitle>
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Livraisons hebdo</CardTitle>
+                <Truck className="h-6 w-6 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-orange-600">15/20T</p>
+                <div className="text-3xl font-bold">15/20T</div>
+                <p className="text-xs text-muted-foreground">3 en transit</p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>💰 Chiffre d'affaires mensuel</CardTitle>
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">CA Mensuel</CardTitle>
+                <Euro className="h-6 w-6 text-green-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-green-600">€225K</p>
+                <div className="text-3xl font-bold">225K€</div>
+                <p className="text-xs text-muted-foreground">+14% vs mois dernier</p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>⏱ Délai moyen de livraison</CardTitle>
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Délai moyen</CardTitle>
+                <Clock className="h-6 w-6 text-red-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-red-600">2.3 jours</p>
+                <div className="text-3xl font-bold">2.3j</div>
+                <p className="text-xs text-muted-foreground">-0.5j vs objectif</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Graphique des Performances */}
-          <div className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>📉 Graphique des Performances</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Line data={data} options={options} />
-              </CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="p-4 h-96">
+              <h3 className="text-lg font-semibold mb-4">Performance des Livraisons</h3>
+              <Line data={lineChartData} options={chartOptions} />
+            </Card>
+
+            <Card className="p-4 h-96">
+              <h3 className="text-lg font-semibold mb-4">Répartition des Ventes</h3>
+              <Bar data={barChartData} options={chartOptions} />
             </Card>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Commandes Récentes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left text-sm text-gray-500">
+                      <th className="pb-3">N° Commande</th>
+                      <th className="pb-3">Client</th>
+                      <th className="pb-3">Produit</th>
+                      <th className="pb-3">Statut</th>
+                      <th className="pb-3">Livraison</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...Array(5)].map((_, i) => (
+                      <tr key={i} className="border-t">
+                        <td className="py-3">#45{i}87</td>
+                        <td>ArcelorMittal</td>
+                        <td>Coke Métallurgique</td>
+                        <td>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                            Livré
+                          </span>
+                        </td>
+                        <td>12/06/2024</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </main>
       </div>
     </div>

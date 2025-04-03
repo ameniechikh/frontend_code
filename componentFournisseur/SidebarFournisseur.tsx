@@ -1,28 +1,31 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { LayoutDashboard, Package, ClipboardList, Truck, MessageSquare, FileText } from "lucide-react";
+import { LayoutDashboard, Bell, Package, ClipboardList, Truck, MessageSquare, FileText } from "lucide-react";
 
 const SidebarFournisseur = () => {
   const router = useRouter();
 
   const menuItems = [
     { name: "Tableau de Bord", path: "/Fournisseur/dashboard", icon: <LayoutDashboard size={20} /> },
-    { name: "Catalogue", path: "/Fournisseur/catalogue", icon: <Package size={20} /> },
-    { name: "Commandes", path: "/Fournisseur/commandes", icon: <ClipboardList size={20} /> },
-    { name: "Historique Livraisons", path: "/Fournisseur/historique-livraisons", icon: <Truck size={20} /> },
+    { name: "Catalogue matières premières", path: "/Fournisseur/catalogue", icon: <Package size={20} /> },
+    { name: "Historique Commandes", path: "/Fournisseur/Commandes", icon: <ClipboardList size={20} /> },
+    { name: "  Factures et Paiements", path: "/Fournisseur/factures", icon: <FileText size={20} /> },
     { name: "Messagerie", path: "/Fournisseur/messagerie", icon: <MessageSquare size={20} /> },
-    { name: " Factures", path: "/Fournisseur/factures", icon: <FileText size={20} /> },
+    { name: "Notifications", path: "/Fournisseur/Notifications", icon: <Bell size={20} /> },
   ];
 
   return (
     <aside className="w-64 h-screen bg-gray-900 text-white flex flex-col shadow-lg">
-      {/* Logo */}
-      <div className="p-6 flex items-center space-x-3">
-        <img src="/logo6.png" alt="SteelFlow Pro" className="h-10" />
-        <h1 className="text-xl font-semibold tracking-wide">SteelFlow Pro</h1>
+      {/* Logo modifié */}
+      <div className="p-6 flex items-center justify-center"> {/* Centrage ajouté */}
+        <img 
+          src="/logo6.png" 
+          alt="SteelFlow Pro" 
+          className="h-12 w-12 rounded-full border-2 border-white p-1 object-cover" 
+        />
       </div>
 
-      {/* Menu */}
+      {/* Menu reste inchangé */}
       <nav className="flex-1">
         <ul className="space-y-2 p-4">
           {menuItems.map((item) => (

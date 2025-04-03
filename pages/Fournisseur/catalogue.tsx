@@ -1,334 +1,351 @@
 import { useState } from "react";
-import { Search, Download, Edit, Trash, X } from "lucide-react";
+import { Search, Download, Edit, Trash, X, FileText, Image, Check, Ban } from "lucide-react";
 import SidebarFournisseur from "../../componentFournisseur/SidebarFournisseur";
 import HeaderFournisseur from "../../componentFournisseur/HeaderFournisseur";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
 
-const CatalogueMP = () => {
+interface Material {
+  id: number;
+  name: string;
+  description: string;
+  quantity: number;
+  minimumOrder: number;
+  pricePerUnit: number;
+  specifications: string[];
+  available: boolean;
+}
+
+const GestionMatieresPremieres = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [materials, setMaterials] = useState([
+  const [filterAvailability, setFilterAvailability] = useState("all");
+  const [materials, setMaterials] = useState<Material[]>([
     {
       id: 1,
-      ref: "F001",
-      name: "Ferraille",
-      category: "Métal",
-      specs: "Ferraille de qualité",
-      stock: 1200,
-      price: "350 €/T",
-      supplier: "Fournisseur A",
-      status: "Disponible",
-      urgency: "🟢",
-      nextDelivery: "01/04/2025",
+      name: "Coke Métallurgique",
+      description: "Coke de qualité supérieure - Source: Allemagne",
+      quantity: 1200,
+      minimumOrder: 100,
+      pricePerUnit: 500,
+      specifications: ["specs.pdf", "photo.jpg"],
+      available: true,
     },
     {
       id: 2,
-      ref: "C002",
-      name: "Coke",
-      category: "Combustible",
-      specs: "Coke de qualité supérieure",
-      stock: 800,
-      price: "500 €/T",
-      supplier: "Fournisseur B",
-      status: "En rupture",
-      urgency: "🔴",
-      nextDelivery: "N/A",
-    },
-    {
-      id: 3,
-      ref: "M003",
-      name: "Minerai de fer",
-      category: "Métal",
-      specs: "Minerai de haute qualité",
-      stock: 1500,
-      price: "420 €/T",
-      supplier: "Fournisseur C",
-      status: "Disponible",
-      urgency: "🟠",
-      nextDelivery: "15/05/2025",
+      name: "Minerai de Fer 65%",
+      description: "Minerai de haute teneur - Brésil",
+      quantity: 0,
+      minimumOrder: 50,
+      pricePerUnit: 420,
+      specifications: ["analyse.pdf"],
+      available: false,
     },
   ]);
 
-  const [newMaterial, setNewMaterial] = useState({
-    ref: "",
+  const [newMaterial, setNewMaterial] = useState<Partial<Material>>({
     name: "",
-    category: "",
-    specs: "",
-    stock: "",
-    price: "",
-    supplier: "",
-    status: "Disponible",
-    urgency: "🟢",
-    nextDelivery: "",
+    description: "",
+    quantity: 0,
+    minimumOrder: 0,
+    pricePerUnit: 0,
+    specifications: [],
+    available: true,
   });
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [showForm, setShowForm] = useState(false); // Contrôle l'affichage du formulaire
+  const [showForm, setShowForm] = useState(false);
 
-  const filteredMaterials = materials.filter(
-    (mat) =>
-      mat.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (filterStatus === "all" || mat.status === filterStatus)
-  );
+  // Filtrage des matières premières
+  const filteredMaterials = materials.filter(mat => {
+    const matchesSearch = mat.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesAvailability = filterAvailability === "all" || 
+      (filterAvailability === "available" && mat.available) || 
+      (filterAvailability === "unavailable" && !mat.available);
+    return matchesSearch && matchesAvailability;
+  });
 
+  // Gestion des actions
   const handleDelete = (id: number) => {
-    setMaterials(materials.filter((mat) => mat.id !== id));
+    setMaterials(materials.filter(mat => mat.id !== id));
   };
 
   const handleEdit = (id: number) => {
-    const materialToEdit = materials.find((mat) => mat.id === id);
-    setNewMaterial(materialToEdit);
-    setIsEditing(true);
-    setEditId(id);
-    setShowForm(true); // Afficher le formulaire pour modification
+    const material = materials.find(mat => mat.id === id);
+    if (material) {
+      setNewMaterial(material);
+      setIsEditing(true);
+      setShowForm(true);
+    }
   };
 
-  const handleAddOrUpdate = () => {
+  const handleSubmit = () => {
     if (isEditing) {
-      // Mettre à jour la matière
-      setMaterials(
-        materials.map((mat) =>
-          mat.id === editId ? { ...mat, ...newMaterial } : mat
-        )
-      );
+      setMaterials(materials.map(mat => 
+        mat.id === newMaterial.id ? { ...mat, ...newMaterial } : mat
+      ));
     } else {
-      // Ajouter une nouvelle matière
-      setMaterials([
-        ...materials,
-        { id: Date.now(), ...newMaterial },
-      ]);
+      setMaterials([...materials, { 
+        id: Date.now(), 
+        ...newMaterial as Material 
+      }]);
     }
     resetForm();
   };
 
   const resetForm = () => {
     setNewMaterial({
-      ref: "",
       name: "",
-      category: "",
-      specs: "",
-      stock: "",
-      price: "",
-      supplier: "",
-      status: "Disponible",
-      urgency: "🟢",
-      nextDelivery: "",
+      description: "",
+      quantity: 0,
+      minimumOrder: 0,
+      pricePerUnit: 0,
+      specifications: [],
+      available: true,
     });
     setIsEditing(false);
-    setEditId(null);
-    setShowForm(false); // Cacher le formulaire après l'action
-  };
-
-  const openForm = () => {
-    setIsEditing(false);
-    resetForm();
-    setShowForm(true); // Ouvrir le formulaire
-  };
-
-  const closeForm = () => {
-    setShowForm(false); // Cacher le formulaire
-    resetForm(); // Réinitialiser les champs du formulaire
+    setShowForm(false);
   };
 
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <SidebarFournisseur />
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar Fixe */}
+      <div className="fixed left-0 top-0 h-screen w-64 shadow-lg">
+        <SidebarFournisseur />
+      </div>
 
-      {/* Contenu principal */}
-      <div className="flex-1 p-6">
-        {/* Header */}
+      {/* Contenu Principal */}
+      <div className="ml-64 flex-1 flex flex-col min-h-screen">
         <HeaderFournisseur />
 
-        <h1 className="text-3xl font-bold mb-6">📦 Catalogue Matières Premières</h1>
-
-        <div className="flex gap-4 mb-6">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-2.5 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Rechercher une matière..."
-              className="pl-10 p-2 border rounded w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <main className="flex-1 p-6 space-y-6">
+          {/* En-tête */}
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Gestion des Matières Premières</h1>
+            <button 
+              onClick={() => setShowForm(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+            >
+              + Ajouter une matière
+            </button>
           </div>
 
-          <select
-            className="p-2 border rounded"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">Tous</option>
-            <option value="Disponible">Disponible</option>
-            <option value="En rupture">En rupture</option>
-          </select>
-
-          <button className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2">
-            <Download size={16} /> Exporter (PDF/Excel)
-          </button>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>📋 Liste des Matières Premières</CardTitle>
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-              onClick={openForm} // Ouvrir le formulaire pour ajouter une matière
+          {/* Filtres */}
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher par nom..."
+                className="pl-10 pr-4 py-2 border rounded-lg w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <select
+              className="px-4 py-2 border rounded-lg"
+              value={filterAvailability}
+              onChange={(e) => setFilterAvailability(e.target.value)}
             >
-              Ajouter une matière
-            </button>
-          </CardHeader>
-          <CardContent>
-            <table className="w-full border-collapse border border-gray-300">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="border p-2">Référence</th>
-                  <th className="border p-2">Nom Matière</th>
-                  <th className="border p-2">Catégorie</th>
-                  <th className="border p-2">Spécifications Techniques</th>
-                  <th className="border p-2">Stock (tonnes)</th>
-                  <th className="border p-2">Prix (€/tonne)</th>
-                  <th className="border p-2">Fournisseur</th>
-                  <th className="border p-2">Statut</th>
-                  <th className="border p-2">Urgence</th>
-                  <th className="border p-2">Prochaine Livraison</th>
-                  <th className="border p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMaterials.map((mat) => (
-                  <tr key={mat.id} className="text-center">
-                    <td className="border p-2">{mat.ref}</td>
-                    <td className="border p-2">{mat.name}</td>
-                    <td className="border p-2">{mat.category}</td>
-                    <td className="border p-2">{mat.specs}</td>
-                    <td className="border p-2">{mat.stock} T</td>
-                    <td className="border p-2">{mat.price}</td>
-                    <td className="border p-2">{mat.supplier}</td>
-                    <td className="border p-2">{mat.status}</td>
-                    <td className="border p-2">{mat.urgency}</td>
-                    <td className="border p-2">{mat.nextDelivery}</td>
-                    <td className="border p-2">
-                      <button
-                        className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                        onClick={() => handleEdit(mat.id)}
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        className="bg-red-600 text-white px-2 py-1 rounded"
-                        onClick={() => handleDelete(mat.id)}
-                      >
-                        <Trash size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
+              <option value="all">Tous</option>
+              <option value="available">Disponible</option>
+              <option value="unavailable">Indisponible</option>
+            </select>
+          </div>
 
-        {/* Formulaire d'ajout ou modification d'une matière */}
-        {showForm && (
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>{isEditing ? "Modifier une Matière" : "Ajouter une Matière"}</CardTitle>
-              <button
-                className="absolute top-2 right-2 text-red-600"
-                onClick={closeForm}
-              >
-                <X size={24} />
-              </button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Référence"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.ref}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, ref: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Nom de la Matière"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.name}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, name: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Catégorie"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.category}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, category: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Spécifications Techniques"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.specs}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, specs: e.target.value })}
-                />
-                <input
-                  type="number"
-                  placeholder="Stock (tonnes)"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.stock}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, stock: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Prix (€/tonne)"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.price}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, price: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Fournisseur"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.supplier}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, supplier: e.target.value })}
-                />
-                <select
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.status}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, status: e.target.value })}
-                >
-                  <option value="Disponible">Disponible</option>
-                  <option value="En rupture">En rupture</option>
-                </select>
-                <input
-                  type="text"
-                  placeholder="Urgence"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.urgency}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, urgency: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Prochaine Livraison"
-                  className="p-2 border rounded w-full"
-                  value={newMaterial.nextDelivery}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, nextDelivery: e.target.value })}
-                />
-                <button
-                  onClick={handleAddOrUpdate}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
-                >
-                  {isEditing ? "Modifier" : "Ajouter"} une Matière
-                </button>
-              </div>
+          {/* Tableau */}
+          <Card>
+            <CardContent className="p-0">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="p-4 text-left">Nom</th>
+                    <th className="p-4 text-left">Description</th>
+                    <th className="p-4 text-left">Stock (T)</th>
+                    <th className="p-4 text-left">Commande Min.</th>
+                    <th className="p-4 text-left">Prix/Unité</th>
+                    <th className="p-4 text-left">Spécifications</th>
+                    <th className="p-4 text-left">Statut</th>
+                    <th className="p-4 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMaterials.map(mat => (
+                    <tr key={mat.id} className="border-t hover:bg-gray-50">
+                      <td className="p-4">{mat.name}</td>
+                      <td className="p-4 text-gray-600">{mat.description}</td>
+                      <td className="p-4">{mat.quantity.toLocaleString()} T</td>
+                      <td className="p-4">{mat.minimumOrder} T</td>
+                      <td className="p-4">{mat.pricePerUnit.toLocaleString()} €/T</td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          {mat.specifications.map((file, index) => (
+                            <a 
+                              key={index} 
+                              href="#" 
+                              className="text-blue-600 flex items-center gap-1"
+                            >
+                              <FileText className="h-4 w-4" />
+                              {file}
+                            </a>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        {mat.available ? (
+                          <span className="text-green-600 flex items-center gap-1">
+                            <Check className="h-5 w-5" /> Disponible
+                          </span>
+                        ) : (
+                          <span className="text-red-600 flex items-center gap-1">
+                            <Ban className="h-5 w-5" /> Indisponible
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4 flex gap-2">
+                        <button
+                          onClick={() => handleEdit(mat.id)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(mat.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash className="h-5 w-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </CardContent>
           </Card>
-        )}
+
+          {/* Formulaire */}
+          {showForm && (
+            <Card className="mt-6">
+              <CardHeader className="relative">
+                <CardTitle>
+                  {isEditing ? "Modifier la Matière" : "Nouvelle Matière"}
+                </CardTitle>
+                <button 
+                  onClick={resetForm}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label>Nom de la matière *</label>
+                    <input
+                      type="text"
+                      className="w-full p-2 border rounded-lg"
+                      value={newMaterial.name}
+                      onChange={(e) => setNewMaterial({...newMaterial, name: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label>Description</label>
+                    <textarea
+                      className="w-full p-2 border rounded-lg"
+                      value={newMaterial.description}
+                      onChange={(e) => setNewMaterial({...newMaterial, description: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label>Stock actuel (tonnes) *</label>
+                    <input
+                      type="number"
+                      className="w-full p-2 border rounded-lg"
+                      value={newMaterial.quantity}
+                      onChange={(e) => setNewMaterial({...newMaterial, quantity: Number(e.target.value)})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label>Commande minimale (tonnes) *</label>
+                    <input
+                      type="number"
+                      className="w-full p-2 border rounded-lg"
+                      value={newMaterial.minimumOrder}
+                      onChange={(e) => setNewMaterial({...newMaterial, minimumOrder: Number(e.target.value)})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label>Prix par tonne (€) *</label>
+                    <input
+                      type="number"
+                      className="w-full p-2 border rounded-lg"
+                      value={newMaterial.pricePerUnit}
+                      onChange={(e) => setNewMaterial({...newMaterial, pricePerUnit: Number(e.target.value)})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label>Disponibilité</label>
+                    <select
+                      className="w-full p-2 border rounded-lg"
+                      value={newMaterial.available ? "true" : "false"}
+                      onChange={(e) => setNewMaterial({...newMaterial, available: e.target.value === "true"})}
+                    >
+                      <option value="true">Disponible</option>
+                      <option value="false">Indisponible</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label>Fichiers techniques (PDF/Images)</label>
+                    <div className="flex items-center gap-2 border rounded-lg p-2">
+                      <label className="cursor-pointer text-blue-600 flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        Ajouter des fichiers
+                        <input
+                          type="file"
+                          className="hidden"
+                          multiple
+                          accept=".pdf,.jpg,.png"
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            setNewMaterial({
+                              ...newMaterial,
+                              specifications: [
+                                ...(newMaterial.specifications || []),
+                                ...files.map(f => f.name)
+                              ]
+                            });
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {newMaterial.specifications?.map((file, index) => (
+                        <span key={index} className="text-sm bg-gray-100 px-2 py-1 rounded">
+                          {file}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleSubmit}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  {isEditing ? "Mettre à jour" : "Enregistrer"}
+                </button>
+              </CardContent>
+            </Card>
+          )}
+        </main>
       </div>
     </div>
   );
 };
 
-export default CatalogueMP;
+export default GestionMatieresPremieres;

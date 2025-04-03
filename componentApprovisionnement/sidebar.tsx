@@ -1,32 +1,58 @@
-import { ClipboardList, Truck, Package } from "lucide-react";
+import { LayoutDashboard, Boxes, ShoppingCart, FileText, ListOrdered, Receipt } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const Sidebar = () => {
   return (
     <div className="w-64 h-full bg-gray-800 text-white fixed flex flex-col p-5">
-      {/* Logo / Titre */}
-      <div className="text-2xl font-bold text-center mb-6">📦 Approvisionnement</div>
+      {/* Logo */}
+      <div className="mb-4 flex justify-center">
+        <div className="relative h-16 w-16 rounded-full overflow-hidden border-2 border-white">
+          <Image 
+            src="/logo6.png" // Remplacez par le chemin de votre logo
+            alt="Logo"
+            fill
+            className="h-20 w-20 rounded-full border-2 border-white p-1 object-cover"
+          />
+        </div>
+      </div>
 
       {/* Liens de navigation */}
       <nav className="space-y-4">
-        <Link href="/Approvisionnement/Planification">
+        <Link href="/Approvisionnement/Dashboard">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
-            <ClipboardList className="w-5 h-5" />
-            <span>Planification MP</span>
+            <LayoutDashboard className="w-5 h-5" />
+            <span>Tableau de Bord</span>
           </div>
         </Link>
 
-        <Link href="/Approvisionnement/ReceptionMatieres">
+        <Link href="/Approvisionnement/CatalogueMatieres">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
-            <Truck className="w-5 h-5" />
-            <span>Réception Matières</span>
+            <Boxes className="w-5 h-5" />
+            <span>Catalogue matières premières</span>
           </div>
         </Link>
 
-        <Link href="/Approvisionnement/DemandeProduction">
+       
+
+        <Link href="/Approvisionnement/DemandeAchat">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
-            <Package className="w-5 h-5" />
-            <span>Demande Production</span>
+            <FileText className="w-5 h-5" />
+            <span>Demande d'achat</span>
+          </div>
+        </Link>
+
+        <Link href="/Approvisionnement/SuiviCommandes">
+          <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
+            <ListOrdered className="w-5 h-5" />
+            <span>Suivi des commandes</span>
+          </div>
+        </Link>
+
+        <Link href="/Approvisionnement/FacturesPaiements">
+          <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
+            <Receipt className="w-5 h-5" />
+            <span>Factures et paiements</span>
           </div>
         </Link>
       </nav>
