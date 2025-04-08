@@ -1,84 +1,161 @@
 import React, { useState } from "react";
 import Header from "../../componentMagasinie/Header";
 import Sidebar from "../../componentMagasinie/Sidebar";
-import { FileText, Download, QrCode } from "lucide-react";
-import Button from "../../componentFournisseur/Button";
+import { Truck, Printer, CheckCircle, Mail, Package } from "lucide-react";
 
-const BonDeSortie = () => {
-  const [selectedBon, setSelectedBon] = useState(null);
+const StockSortie = () => {
+  const [commandes, setCommandes] = useState([
+    {
+      id: "CMD-2401",
+      client: "Société ABC",
+      produits: [
+        { ref: "AC-S355", quantité: 50 },
+        { ref: "AL-6061", quantité: 30 }
+      ],
+      dateSortie: "2024-03-20",
+      statut: "En préparation",
+    },
+    {
+      id: "CMD-2402",
+      client: "Entreprise XYZ",
+      produits: [
+        { ref: "CU-C1020", quantité: 20 }
+      ],
+      dateSortie: "2024-03-21",
+      statut: "Livré",
+    }
+  ]);
 
-  const bonsDeSortie = [
-    { id: "BS-2024-001", date: "10/03/2024", poidsTheorique: "1200 kg", poidsReel: "1185 kg", qrCode: "qr_001.png", pdf: "bon_sortie_001.pdf" },
-    { id: "BS-2024-002", date: "12/03/2024", poidsTheorique: "800 kg", poidsReel: "805 kg", qrCode: "qr_002.png", pdf: "bon_sortie_002.pdf" },
-  ];
+  const handleValiderSortie = (commandeId) => {
+    setCommandes(commandes.map(cmd => 
+      cmd.id === commandeId ? { ...cmd, statut: "Livré" } : cmd
+    ));
+  };
 
-  const handleDownload = (pdfFile) => {
-    const link = document.createElement("a");
-    link.href = `/bons_de_sortie/${pdfFile}`;
-    link.download = pdfFile;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleImprimerBon = (commandeId) => {
+    const commande = commandes.find(cmd => cmd.id === commandeId);
+    console.log("Impression du bon pour:", commande);
+    // Logique d'impression ici
+  };
+
+  const handleEnvoyerConfirmation = (commandeId) => {
+    const commande = commandes.find(cmd => cmd.id === commandeId);
+    console.log("Envoi confirmation pour:", commande);
+    // Logique d'envoi email ici
+  };
+
+  const StatusBadge = ({ statut }) => {
+    const statusConfig = {
+      "En préparation": "bg-orange-100 text-orange-700",
+      "Livré": "bg-green-100 text-green-700",
+    };
+    
+    return (
+      <span className={`px-3 py-1 rounded-full text-sm ${statusConfig[statut]}`}>
+        {statut}
+      </span>
+    );
   };
 
   return (
     <div className="flex h-screen">
-      {/* Sidebar */}
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        {/* Header */}
         <Header />
+        
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-6">📦 Bon de Sortie</h1>
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-300 p-2">Date</th>
-                <th className="border border-gray-300 p-2">N° Bon</th>
-                <th className="border border-gray-300 p-2">Poids Théorique</th>
-                <th className="border border-gray-300 p-2">Poids Réel</th>
-                <th className="border border-gray-300 p-2">Écart</th>
-                <th className="border border-gray-300 p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bonsDeSortie.map((bon) => (
-                <tr key={bon.id} className="text-center">
-                  <td className="border border-gray-300 p-2">{bon.date}</td>
-                  <td className="border border-gray-300 p-2">{bon.id}</td>
-                  <td className="border border-gray-300 p-2">{bon.poidsTheorique}</td>
-                  <td className="border border-gray-300 p-2">{bon.poidsReel}</td>
-                  <td className={`border border-gray-300 p-2 ${Math.abs(bon.poidsTheorique - bon.poidsReel) > 10 ? "text-red-500" : "text-green-500"}`}>
-                    {Math.abs(bon.poidsTheorique - bon.poidsReel)} kg
-                  </td>
-                  <td className="border border-gray-300 p-2 space-x-2">
-                    <Button variant="ghost" onClick={() => setSelectedBon(bon)}>
-                      <QrCode size={18} /> Scanner
-                    </Button>
-                    <Button variant="ghost" onClick={() => handleDownload(bon.pdf)}>
-                      <Download size={18} /> Exporter
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Affichage du bon sélectionné */}
-          {selectedBon && (
-            <div className="mt-6 p-4 border rounded-lg bg-white shadow">
-              <h2 className="text-xl font-semibold">🔍 Visualisation de {selectedBon.id}</h2>
-              <p><strong>Date :</strong> {selectedBon.date}</p>
-              <p><strong>Poids Théorique :</strong> {selectedBon.poidsTheorique}</p>
-              <p><strong>Poids Réel :</strong> {selectedBon.poidsReel}</p>
-              <img src={`/qr_codes/${selectedBon.qrCode}`} alt="QR Code" className="w-32 h-32 mt-4" />
-              <iframe src={`/bons_de_sortie/${selectedBon.pdf}`} className="w-full h-96 border rounded-lg mt-4"></iframe>
+          <div className="bg-white rounded-lg shadow-sm border">
+            {/* En-tête */}
+            <div className="p-4 border-b">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Package className="text-blue-500" size={24} />
+                Gestion du Stock de Sortie
+              </h2>
             </div>
-          )}
+
+            {/* Tableau des commandes */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Commande</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Client</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Produits</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Quantité Totale</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Statut</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {commandes.map((commande) => (
+                    <tr key={commande.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium">{commande.id}</td>
+                      <td className="px-4 py-3">{commande.client}</td>
+                      <td className="px-4 py-3">
+                        <ul className="list-disc list-inside">
+                          {commande.produits.map((produit, index) => (
+                            <li key={index}>
+                              {produit.ref} ({produit.quantité}u)
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td className="px-4 py-3">
+                        {commande.produits.reduce((acc, curr) => acc + curr.quantité, 0)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge statut={commande.statut} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {commande.statut === "En préparation" && (
+                            <button
+                              onClick={() => handleValiderSortie(commande.id)}
+                              className="p-2 text-green-600 hover:bg-green-50 rounded-md"
+                              title="Valider la sortie"
+                            >
+                              <CheckCircle size={20} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleImprimerBon(commande.id)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
+                            title="Imprimer le bon"
+                          >
+                            <Printer size={20} />
+                          </button>
+                          <button
+                            onClick={() => handleEnvoyerConfirmation(commande.id)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-md"
+                            title="Envoyer confirmation"
+                          >
+                            <Mail size={20} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Section de validation groupée */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="text-blue-600" size={20} />
+                <span className="font-medium">Validation de sortie groupée</span>
+              </div>
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2">
+                <CheckCircle size={18} /> Valider les sorties sélectionnées
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default BonDeSortie;
+export default StockSortie;

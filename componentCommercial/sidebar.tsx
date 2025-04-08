@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, ShoppingCart, Package, Users, FileText, BarChart } from "lucide-react";
+import { Home, ShoppingCart, Package, Users, FileText, BarChart, ListOrdered } from "lucide-react";
 
 const Sidebar = () => {
   return (
@@ -29,23 +29,32 @@ const Sidebar = () => {
         <Link href="/Commercial/GestionCommandes" legacyBehavior>
           <a className="flex items-center space-x-3 p-3 rounded-lg hover:bg-amber-100 transition-colors">
             <ShoppingCart className="text-amber-900 w-6 h-6" />
-            <span className="text-amber-900 font-semibold">Gestion des Commandes</span>
+            <span className="text-amber-900 font-semibold">Commandes Clients</span>
           </a>
         </Link>
-
-        <Link href="/Commercial/GestionProduitsFinis" legacyBehavior>
+        <Link href="/Commercial/GestionCommandesFournisseurs" legacyBehavior>
           <a className="flex items-center space-x-3 p-3 rounded-lg hover:bg-amber-100 transition-colors">
             <Package className="text-amber-900 w-6 h-6" />
-            <span className="text-amber-900 font-semibold">Produits Finis</span>
+            <span className="text-amber-900 font-semibold">Commandes Fournisseurs</span>
           </a>
         </Link>
-
         <Link href="/Commercial/GestionClients" legacyBehavior>
           <a className="flex items-center space-x-3 p-3 rounded-lg hover:bg-amber-100 transition-colors">
             <Users className="text-amber-900 w-6 h-6" />
             <span className="text-amber-900 font-semibold">Gestion Clients</span>
           </a>
         </Link>
+
+        <Link href="/Commercial/GestionFournisseurs" legacyBehavior>
+          <a className="flex items-center space-x-3 p-3 rounded-lg hover:bg-amber-100 transition-colors">
+            <Users className="text-amber-900 w-6 h-6" />
+            <span className="text-amber-900 font-semibold">Gestion Fournisseurs</span>
+          </a>
+        </Link>
+
+       
+
+      
 
         <Link href="/Commercial/FacturesRapports" legacyBehavior>
           <a className="flex items-center space-x-3 p-3 rounded-lg hover:bg-amber-100 transition-colors">

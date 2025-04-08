@@ -26,35 +26,30 @@ const Sidebar = () => {
           </div>
         </Link>
 
-        <Link href="/Approvisionnement/CatalogueMatieres">
+        <Link href="/Approvisionnement/GestionMatieresPremieres">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <Boxes className="w-5 h-5" />
-            <span>Catalogue matières premières</span>
+            <span>Gestion des matières premières</span>
           </div>
         </Link>
 
        
 
-        <Link href="/Approvisionnement/DemandeAchat">
+        <Link href="/Approvisionnement/ReceptionStock">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <FileText className="w-5 h-5" />
-            <span>Demande d'achat</span>
+            <span>Réception Stock</span>
           </div>
         </Link>
 
-        <Link href="/Approvisionnement/SuiviCommandes">
+        <Link href="/Approvisionnement/DemandeProduction">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <ListOrdered className="w-5 h-5" />
-            <span>Suivi des commandes</span>
+            <span> Demande de Production</span>
           </div>
         </Link>
 
-        <Link href="/Approvisionnement/FacturesPaiements">
-          <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
-            <Receipt className="w-5 h-5" />
-            <span>Factures et paiements</span>
-          </div>
-        </Link>
+       
       </nav>
     </div>
   );

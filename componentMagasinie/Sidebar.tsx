@@ -1,67 +1,105 @@
 import { useState } from "react";
 import Link from "next/link";
-import { Home, ShoppingCart, User, HelpCircle } from "lucide-react";
-import { Package, FileText, AlertCircle, LogOut } from "lucide-react";
+import { 
+  LayoutDashboard,
+  Package,
+  ClipboardList,
+  ScanSearch,
+  FileText,
+  Inbox,
+  History,
+  LogOut
+} from "lucide-react";
 
 const Sidebar = () => {
   const [activeTab, setActiveTab] = useState("stock");
 
   return (
-    <div className="h-screen w-64 bg-black text-white flex flex-col p-4">
-      <div className="text-xl font-bold mb-6 text-center">📦 Magasin</div>
-      
-      <nav className="flex flex-col space-y-4">
-      
-        
-        <Link href="/Magasinie/DashboardStock" legacyBehavior>
-          <a className="flex items-center space-x-3 p-3 rounded-lg !hover:bg-purple-200">
-            <User className="text-black w-6 h-6" />
-            <span className="text-white font-semibold">Dashboard Stock</span>
-          </a>
-        </Link>
-        <Link href="/Magasinie/FicheProduit" legacyBehavior>
-          <a className="flex items-center space-x-3 p-3 rounded-lg !hover:bg-purple-200">
-            <User className="text-black w-6 h-6" />
-            <span className="text-white font-semibold">Fiche Produit</span>
-          </a>
-        </Link>
-        <Link href="/Magasinie/BonSortie" legacyBehavior>
-          <a className="flex items-center space-x-3 p-3 rounded-lg !hover:bg-purple-200">
-            <User className="text-black w-6 h-6" />
-            <span className="text-white font-semibold">Bon de Sortie</span>
-          </a>
-        </Link>
-        <Link href="/Magasinie/ControleQualite" legacyBehavior>
-          <a className="flex items-center space-x-3 p-3 rounded-lg !hover:bg-purple-200">
-            <User className="text-black w-6 h-6" />
-            <span className="text-white font-semibold">Contrôle Qualité</span>
-          </a>
-        </Link>
-         <Link href="/Magasinie/TrackingColis" legacyBehavior>
-          <a className="flex items-center space-x-3 p-3 rounded-lg !hover:bg-purple-200">
-            <User className="text-black w-6 h-6" />
-            <span className="text-white font-semibold">Tracking Colis</span>
-          </a>
-        </Link>
-        <Link href="/Magasinie/InventaireIntelligent" legacyBehavior>
-          <a className="flex items-center space-x-3 p-3 rounded-lg !hover:bg-purple-200">
-            <User className="text-black w-6 h-6" />
-            <span className="text-white font-semibold">Inventaire Intelligent</span>
-          </a>
-        </Link>
-        <Link href="/Magasinie/PreparationCommande" legacyBehavior>
-          <a className="flex items-center space-x-3 p-3 rounded-lg !hover:bg-purple-200">
-            <User className="text-black w-6 h-6" />
-            <span className="text-white font-semibold">Préparation Commande</span>
-          </a>
-        </Link>
-        
-        
-      </nav>
-      
-      <div className="mt-auto">
-       
+    <div className="h-screen w-64 bg-gray-900 text-white flex flex-col p-4">
+      {/* Logo circulaire */}
+      <div className="flex items-center justify-center mb-8">
+        <div className="h-20 w-20 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg">
+          <img 
+            src="/logo6.png" 
+            alt="Monseb Logo"
+            className="h-full w-full object-cover"
+          />
+        </div>
       </div>
+
+      <nav className="flex flex-col gap-2">
+        <Link 
+          href="/Magasinie/DashboardStock"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'dashboard' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+          <span>Dashboard Stock</span>
+        </Link>
+
+        <Link
+          href="/Magasinie/FicheProduit"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'produits' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <Package className="w-5 h-5" />
+          <span>Gestion des Produits Finis</span>
+        </Link>
+
+        <Link
+          href="/Magasinie/BonSortie"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'sortie' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <ClipboardList className="w-5 h-5" />
+          <span>Stock de Sortie</span>
+        </Link>
+
+        <Link
+          href="/Magasinie/Inventaire"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'inventaire' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <ScanSearch className="w-5 h-5" />
+          <span>Inventaire</span>
+        </Link>
+
+        <Link
+          href="/Magasinie/Rapports"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'rapports' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <FileText className="w-5 h-5" />
+          <span>Rapports</span>
+        </Link>
+
+        <Link
+          href="/Magasinie/DemandesInternes"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'demandes' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <Inbox className="w-5 h-5" />
+          <span>Suivi des Demandes</span>
+        </Link>
+
+        <Link
+          href="/Magasinie/HistoriqueMouvements"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'historique' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <History className="w-5 h-5" />
+          <span>Historique des Mouvements</span>
+        </Link>
+      </nav>
+
+    
     </div>
   );
 };
