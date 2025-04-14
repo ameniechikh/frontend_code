@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import HeaderAgentCommercial from "../../componentCommercial/Header";
-import SidebarAgentCommercial from "../../componentCommercial/Sidebar";
+import Sidebar from "../../componentApprovisionnement/Sidebar";
+import Header from "../../componentApprovisionnement/Header";
 import { Save, X, FileText, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
 import Button from "../../componentFournisseur/button";
@@ -111,11 +111,11 @@ const CommandeFournisseur = () => {
   return (
     <div className="flex h-screen">
       <div className="w-64 bg-purple-100 h-full fixed left-0 top-0 p-5 z-50 shadow-xl">
-        <SidebarAgentCommercial />
+        <Sidebar />
       </div>
 
       <div className="flex-1 flex flex-col ml-64">
-        <HeaderAgentCommercial />
+        <Header />
 
         <div className="p-6 max-w-6xl mx-auto">
           <div className="flex border-b mb-6">

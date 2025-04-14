@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Package, AlertCircle, Clock, CheckCircle, XCircle, Edit, Trash2 } from "lucide-react";
-import SidebarApprovisionnement from "../../componentApprovisionnement/Sidebar";
-import HeaderApprovisionnement from "../../componentApprovisionnement/Header";
+import Sidebar from "../../componentProduction/Sidebar";
+import Header from "../../componentProduction/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/Card";
 import Button from "../../componentFournisseur/Button";
 
@@ -90,12 +90,12 @@ const DemandeProduction = () => {
   return (
     <div className="flex h-screen">
       <div className="w-64 fixed top-0 left-0 h-full bg-gray-800 text-white">
-        <SidebarApprovisionnement />
+        <Sidebar />
       </div>
 
       <div className="flex-1 ml-64 flex flex-col">
         <div className="fixed top-0 right-0 left-64 z-50 bg-white shadow-sm">
-          <HeaderApprovisionnement />
+          <Header />
         </div>
 
         <div className="flex gap-6 p-6 flex-1 mt-16">

@@ -36,7 +36,17 @@ const Sidebar = () => {
         >
           <LayoutDashboard className="w-5 h-5" />
           <span>Dashboard Stock</span>
+        </Link> 
+        <Link
+          href="/Magasinie/GestionCommandes"
+          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            activeTab === 'sortie' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
+          }`}
+        >
+          <ClipboardList className="w-5 h-5" />
+          <span>Gestion Commandes clients</span>
         </Link>
+       
 
         <Link
           href="/Magasinie/FicheProduit"
@@ -59,34 +69,18 @@ const Sidebar = () => {
         </Link>
 
         <Link
-          href="/Magasinie/Inventaire"
+          href="/Magasinie/GestionClients"
           className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
             activeTab === 'inventaire' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
           }`}
         >
           <ScanSearch className="w-5 h-5" />
-          <span>Inventaire</span>
+          <span>Gestion Clients</span>
         </Link>
 
-        <Link
-          href="/Magasinie/Rapports"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-            activeTab === 'rapports' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
-          }`}
-        >
-          <FileText className="w-5 h-5" />
-          <span>Rapports</span>
-        </Link>
+        
 
-        <Link
-          href="/Magasinie/DemandesInternes"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-            activeTab === 'demandes' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800'
-          }`}
-        >
-          <Inbox className="w-5 h-5" />
-          <span>Suivi des Demandes</span>
-        </Link>
+        
 
         <Link
           href="/Magasinie/HistoriqueMouvements"

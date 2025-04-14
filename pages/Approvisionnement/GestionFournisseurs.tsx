@@ -1,6 +1,6 @@
 import { useState } from "react";
-import HeaderAgentCommercial from "../../componentCommercial/Header";
-import SidebarAgentCommercial from "../../componentCommercial/Sidebar";
+import Sidebar from "../../componentApprovisionnement/Sidebar";
+import Header from "../../componentApprovisionnement/Header";
 import { Package, Plus, Edit, Trash2, Tag, Search, Save, X } from "lucide-react";
 import Button from "../../componentFournisseur/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
@@ -81,11 +81,11 @@ const GestionFournisseurs = () => {
     <div className="flex h-screen">
       {/* Sidebar Fixée à gauche */}
       <div className="w-64 bg-purple-100 h-full fixed left-0 top-0 p-5 z-50 shadow-xl">
-        <SidebarAgentCommercial />
+        <Sidebar/>
       </div>
 
       <div className="flex-1 ml-64 flex flex-col">
-        <HeaderAgentCommercial />
+        <Header />
 
         <div className="p-6">
           <Card className="w-full">

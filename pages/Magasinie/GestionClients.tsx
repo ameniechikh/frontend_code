@@ -1,6 +1,6 @@
 import { useState } from "react";
-import HeaderAgentCommercial from "../../componentCommercial/Header";
-import SidebarAgentCommercial from "../../componentCommercial/Sidebar";
+import Header from "../../componentMagasinie/Header";
+import Sidebar from "../../componentMagasinie/Sidebar";
 import { Search, Filter, Mail, Bell, User, Phone, Clock, Ban } from "lucide-react";
 import Button from "../../componentFournisseur/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
@@ -63,13 +63,13 @@ const GestionClients = () => {
     <div className="flex h-screen">
       {/* Sidebar Fixée à gauche */}
       <div className="w-64 bg-purple-100 h-full fixed left-0 top-0 p-5 z-50 shadow-xl">
-        <SidebarAgentCommercial />
+        <Sidebar />
       </div>
 
       {/* Contenu principal centré */}
       <div className="flex-1 flex flex-col ml-64">
         {/* Header en haut */}
-        <HeaderAgentCommercial />
+        <Header />
 
         <div className="p-6">
           <Card className="w-full max-w-6xl mx-auto">

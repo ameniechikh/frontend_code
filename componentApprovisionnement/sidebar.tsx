@@ -42,10 +42,19 @@ const Sidebar = () => {
           </div>
         </Link>
 
-        <Link href="/Approvisionnement/DemandeProduction">
+      
+        
+        <Link href="/Approvisionnement/GestionCommandesFournisseurs">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <ListOrdered className="w-5 h-5" />
-            <span> Demande de Production</span>
+            <span>Gestion Commandes Fournisseurs</span>
+          </div>
+        </Link> 
+        
+        <Link href="/Approvisionnement/GestionFournisseurs">
+          <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
+            <ListOrdered className="w-5 h-5" />
+            <span> Gestion Fournisseurs</span>
           </div>
         </Link>
 
