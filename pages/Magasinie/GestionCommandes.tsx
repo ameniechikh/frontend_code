@@ -77,15 +77,23 @@ const GestionCommandes = () => {
   });
 
   return (
-    <div className="flex h-screen">
-      <div className="w-64 bg-purple-100 h-full fixed left-0 top-0 p-5 z-50 shadow-xl">
-        <Sidebar />
+    <div className="flex h-screen overflow-hidden">
+      {/* Sidebar fixe à gauche */}
+      <div className="w-64 bg-purple-100 h-full flex-shrink-0 border-r">
+        <div className="p-5 h-full">
+          <Sidebar />
+        </div>
       </div>
 
-      <div className="flex-1 flex flex-col ml-64">
-        <Header />
+      {/* Conteneur principal */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header fixe en haut */}
+        <div className="h-16 bg-white border-b flex-shrink-0">
+          <Header />
+        </div>
 
-        <div className="p-6">
+        {/* Contenu scrollable */}
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -237,7 +245,7 @@ const GestionCommandes = () => {
 
           {/* Modal Messagerie */}
           {selectedOrder && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
               <div className="bg-white p-6 rounded-lg w-1/2">
                 <h3 className="text-lg font-bold mb-4">
                   Messagerie - {selectedOrder.client}

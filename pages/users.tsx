@@ -5,7 +5,7 @@ import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
 
 const roles = [
-  "Agent commercial",
+  "Agent Production",
   "Agent approvisionnement",
   "Agent magasinier",
   "Fournisseur",

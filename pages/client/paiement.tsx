@@ -14,13 +14,14 @@ const Paiement = () => {
       return;
     }
 
-    // Simulation du paiement (dans un vrai projet, intégrer une API de paiement)
-    setTimeout(() => {
-      router.push({
-        pathname: "/client/confirmation",
-        query: { paymentMethod, total },
-      });
-    }, 2000);
+    router.push({
+      pathname: "/client/informations",
+      query: { 
+        cart: JSON.stringify(parsedCart),
+        total,
+        paymentMethod 
+      },
+    });
   };
 
   return (
@@ -73,7 +74,6 @@ const Paiement = () => {
           </div>
         </div>
 
-        {/* Bouton Valider Paiement */}
         <button
           onClick={handlePayment}
           className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full"
