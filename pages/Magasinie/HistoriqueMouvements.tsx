@@ -38,19 +38,20 @@ const HistoriqueMouvements = () => {
     }
   ]);
 
-  const filteredMouvements = mouvements.filter(mouvement => {
-    const matchesSearch = mouvement.produit.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         mouvement.responsable.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredMouvements = mouvements.filter((mouvement) => {
+    const matchesSearch =
+      mouvement.produit.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mouvement.responsable.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === "tous" || mouvement.type === filterType;
     const matchesDate = !filterDate || mouvement.date === filterDate;
-    
+
     return matchesSearch && matchesType && matchesDate;
   });
 
   const getTypeBadge = (type: string) => {
     const styles = {
       entree: "bg-green-100 text-green-800",
-      sortie: "bg-red-100 text-red-800"
+      sortie: "bg-red-100 text-red-800",
     };
     return (
       <span className={`px-2 py-1 rounded-full text-sm flex items-center gap-1 ${styles[type]}`}>
@@ -61,19 +62,24 @@ const HistoriqueMouvements = () => {
   };
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
+    <div className="flex">
+      {/* Sidebar à gauche qui prend toute la hauteur */}
+      <div className="w-64 min-h-screen bg-white border-r">
+        <Sidebar />
+      </div>
+
+      {/* Contenu à droite qui défile verticalement */}
+      <div className="flex-1 flex flex-col min-h-screen">
         <Header />
-        
-        <div className="p-6">
+
+        <main className="p-6 flex-1 bg-gray-50">
           <div className="bg-white rounded-lg shadow-sm border">
-            {/* En-tête avec filtres */}
+            {/* Filtres */}
             <div className="p-4 border-b flex flex-col gap-4">
               <h1 className="text-xl font-bold flex items-center gap-2">
                 📜 Historique des Mouvements
               </h1>
-              
+
               <div className="flex flex-wrap gap-4 items-center">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -107,7 +113,7 @@ const HistoriqueMouvements = () => {
               </div>
             </div>
 
-            {/* Liste des mouvements */}
+            {/* Tableau */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -132,7 +138,7 @@ const HistoriqueMouvements = () => {
                         {mouvement.date}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
-                        {mouvement.type === "entree" 
+                        {mouvement.type === "entree"
                           ? `Réf. fournisseur: ${mouvement.reference}`
                           : `Client: ${mouvement.client}`}
                       </td>
@@ -142,7 +148,7 @@ const HistoriqueMouvements = () => {
               </table>
             </div>
 
-            {/* Statistiques */}
+            {/* Stats */}
             <div className="p-4 border-t">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-blue-50 p-3 rounded-lg">
@@ -152,13 +158,13 @@ const HistoriqueMouvements = () => {
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="text-sm text-green-600">Entrées</div>
                   <div className="text-xl font-bold mt-1">
-                    {mouvements.filter(m => m.type === "entree").length}
+                    {mouvements.filter((m) => m.type === "entree").length}
                   </div>
                 </div>
                 <div className="bg-red-50 p-3 rounded-lg">
                   <div className="text-sm text-red-600">Sorties</div>
                   <div className="text-xl font-bold mt-1">
-                    {mouvements.filter(m => m.type === "sortie").length}
+                    {mouvements.filter((m) => m.type === "sortie").length}
                   </div>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
@@ -170,7 +176,7 @@ const HistoriqueMouvements = () => {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

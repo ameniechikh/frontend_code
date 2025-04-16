@@ -110,7 +110,7 @@ const CommandeFournisseur = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="w-64 bg-purple-100 h-full fixed left-0 top-0 p-5 z-50 shadow-xl">
+      <div className="w-64 bg-purple-100 h-full fixed left-0 top-0 p-0 z-50 shadow-xl">
         <Sidebar />
       </div>
 

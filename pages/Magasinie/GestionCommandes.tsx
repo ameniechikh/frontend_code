@@ -1,10 +1,11 @@
 import { useState } from "react";
 import Sidebar from "../../componentMagasinie/Sidebar";
 import Header from "../../componentMagasinie/Header";
-import { CheckCircle, XCircle, Bell, Search, Filter, Calendar, Package, Truck, Warehouse, MessageCircle } from "lucide-react";
+import { Search, Filter, Calendar, Package, Truck, Warehouse, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
 import Button from "../../componentFournisseur/button";
 
+// Définition initiale des commandes
 const initialOrders = [
   {
     id: "CMD-2023-0456",
@@ -34,6 +35,7 @@ const initialOrders = [
 ];
 
 const GestionCommandes = () => {
+  // État principal des commandes
   const [orders, setOrders] = useState(initialOrders);
   const [filters, setFilters] = useState({
     statut: "Tous",
@@ -43,17 +45,20 @@ const GestionCommandes = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newMessage, setNewMessage] = useState("");
 
-  const updateOrderStatus = (orderId, newStatus) => {
+  // Fonction de mise à jour du statut
+  const updateOrderStatus = (orderId: string, newStatus: string) => {
     setOrders(orders.map(order => 
       order.id === orderId ? { ...order, statut: newStatus } : order
     ));
   };
 
-  const checkStock = (produits) => {
+  // Vérification du stock
+  const checkStock = (produits: any[]) => {
     return produits.every(produit => produit.quantité <= produit.stock);
   };
 
-  const sendMessage = (orderId) => {
+  // Envoi de message
+  const sendMessage = (orderId: string) => {
     if (!newMessage.trim()) return;
     
     setOrders(orders.map(order => 
@@ -69,6 +74,7 @@ const GestionCommandes = () => {
     setNewMessage("");
   };
 
+  // Filtrage des commandes
   const filteredOrders = orders.filter(order => {
     const matchesStatus = filters.statut === "Tous" || order.statut === filters.statut;
     const matchesClient = order.client.toLowerCase().includes(filters.client.toLowerCase());
@@ -78,161 +84,180 @@ const GestionCommandes = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar fixe à gauche */}
+      {/* Sidebar */}
       <div className="w-64 bg-purple-100 h-full flex-shrink-0 border-r">
-        <div className="p-5 h-full">
+        <div className="p-0 h-full">
           <Sidebar />
         </div>
       </div>
 
-      {/* Conteneur principal */}
+      {/* Contenu principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header fixe en haut */}
-        <div className="h-16 bg-white border-b flex-shrink-0">
-          <Header />
-        </div>
+        <Header />
 
-        {/* Contenu scrollable */}
-        <div className="flex-1 overflow-auto p-6 bg-gray-50">
-          <Card className="w-full">
+        <main className="flex-1 overflow-auto p-6 bg-gray-50 space-y-6">
+          {/* Section Statistiques */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">📊 Statistiques</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Commandes totales</span>
+                  <span className="font-bold">{orders.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>En préparation</span>
+                  <span className="font-bold text-yellow-600">
+                    {orders.filter(o => o.statut === 'En préparation').length}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Filtres */}
+            <Card className="lg:col-span-2 hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="relative">
+                    <select
+                      value={filters.statut}
+                      onChange={(e) => setFilters({...filters, statut: e.target.value})}
+                      className="w-full pl-10 p-2 border rounded-lg"
+                    >
+                      <option value="Tous">Tous les statuts</option>
+                      <option value="En préparation">En préparation</option>
+                      <option value="En attente de stock">En attente de stock</option>
+                      <option value="Expédiée">Expédiée</option>
+                      <option value="Livrée">Livrée</option>
+                      <option value="Annulée">Annulée</option>
+                    </select>
+                    <Filter className="absolute left-3 top-3 text-gray-400" />
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Rechercher client..."
+                      className="w-full pl-10 p-2 border rounded-lg"
+                      value={filters.client}
+                      onChange={(e) => setFilters({...filters, client: e.target.value})}
+                    />
+                    <Search className="absolute left-3 top-3 text-gray-400" />
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="date"
+                      className="w-full pl-10 p-2 border rounded-lg"
+                      value={filters.date}
+                      onChange={(e) => setFilters({...filters, date: e.target.value})}
+                    />
+                    <Calendar className="absolute left-3 top-3 text-gray-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Liste des commandes */}
+          <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                📦 Gestion des Commandes Clients
+                📦 Liste des Commandes
+                <span className="text-sm font-normal text-gray-500">
+                  ({filteredOrders.length} résultats)
+                </span>
               </CardTitle>
             </CardHeader>
-
+            
             <CardContent>
-              {/* Filtres */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="relative">
-                  <select
-                    value={filters.statut}
-                    onChange={(e) => setFilters({...filters, statut: e.target.value})}
-                    className="w-full pl-10 p-2 border rounded-lg"
-                  >
-                    <option value="Tous">Tous les statuts</option>
-                    <option value="En préparation">En préparation</option>
-                    <option value="En attente de stock">En attente de stock</option>
-                    <option value="Expédiée">Expédiée</option>
-                    <option value="Livrée">Livrée</option>
-                    <option value="Annulée">Annulée</option>
-                  </select>
-                  <Filter className="absolute left-3 top-3 text-gray-400" />
-                </div>
+              <div className="space-y-4">
+                {filteredOrders.map((order) => (
+                  <Card key={order.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      {/* Colonne Informations */}
+                      <div className="space-y-1">
+                        <div className="font-semibold text-purple-600">{order.id}</div>
+                        <div className="text-sm">{order.date}</div>
+                        <div className="text-sm flex items-center gap-1">
+                          <MessageCircle size={14} />
+                          {order.messages.length} messages
+                        </div>
+                      </div>
 
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Rechercher client..."
-                    className="w-full pl-10 p-2 border rounded-lg"
-                    value={filters.client}
-                    onChange={(e) => setFilters({...filters, client: e.target.value})}
-                  />
-                  <Search className="absolute left-3 top-3 text-gray-400" />
-                </div>
+                      {/* Colonne Client */}
+                      <div className="space-y-1">
+                        <div className="font-medium">{order.client}</div>
+                        <div className="text-sm text-gray-500 break-all">
+                          {order.contact}
+                        </div>
+                      </div>
 
-                <div className="relative">
-                  <input
-                    type="date"
-                    className="w-full pl-10 p-2 border rounded-lg"
-                    value={filters.date}
-                    onChange={(e) => setFilters({...filters, date: e.target.value})}
-                  />
-                  <Calendar className="absolute left-3 top-3 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Liste des commandes */}
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="p-3 text-left">Commande</th>
-                      <th className="p-3 text-left">Client</th>
-                      <th className="p-3 text-left">Produits</th>
-                      <th className="p-3">Stock</th>
-                      <th className="p-3">Statut</th>
-                      <th className="p-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOrders.map((order) => (
-                      <tr key={order.id} className="border-t hover:bg-gray-50">
-                        <td className="p-3">
-                          <div className="font-medium">{order.id}</div>
-                          <div className="text-sm text-gray-500">{order.date}</div>
-                        </td>
-                        
-                        <td className="p-3">
-                          <div>{order.client}</div>
-                          <div className="text-sm text-gray-500">{order.contact}</div>
-                        </td>
-                        
-                        <td className="p-3">
-                          {order.produits.map((produit, index) => (
-                            <div key={index} className="text-sm mb-2">
-                              <div>{produit.quantité}x {produit.nom}</div>
-                              <div className="text-gray-500">
-                                {produit.prix}€/unité • Total: {produit.quantité * produit.prix}€
-                              </div>
+                      {/* Colonne Produits */}
+                      <div className="space-y-2">
+                        {order.produits.map((produit: any, index: number) => (
+                          <div key={index} className="text-sm">
+                            <div className="flex justify-between">
+                              <span>{produit.quantité}x {produit.nom}</span>
+                              <span className="font-medium">
+                                {(produit.quantité * produit.prix).toLocaleString()}€
+                              </span>
                             </div>
-                          ))}
-                        </td>
-                        
-                        <td className="p-3 text-center">
-                          {checkStock(order.produits) ? (
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                              Stock OK
-                            </span>
-                          ) : (
-                            <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm">
-                              Rupture stock
-                            </span>
-                          )}
-                        </td>
-                        
-                        <td className="p-3 text-center">
-                          <span className={`px-2 py-1 rounded-full text-sm flex items-center justify-center gap-1 ${
-                            order.statut === "Livrée" ? "bg-green-100 text-green-800" :
-                            order.statut === "Annulée" ? "bg-red-100 text-red-800" :
-                            order.statut === "Expédiée" ? "bg-blue-100 text-blue-800" :
-                            order.statut === "En préparation" ? "bg-yellow-100 text-yellow-800" :
-                            "bg-orange-100 text-orange-800"
-                          }`}>
-                            {order.statut === "En préparation" && <Package size={14} />}
-                            {order.statut === "En attente de stock" && <Warehouse size={14} />}
-                            {order.statut === "Expédiée" && <Truck size={14} />}
-                            {order.statut}
-                          </span>
-                        </td>
-                        
-                        <td className="p-3 space-x-2">
-                          <div className="flex flex-col gap-2">
-                            <select
-                              value={order.statut}
-                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                              className="p-1 border rounded text-sm"
-                            >
-                              <option value="En préparation">En préparation</option>
-                              <option value="En attente de stock">En attente stock</option>
-                              <option value="Expédiée">Expédiée</option>
-                              <option value="Livrée">Livrée</option>
-                              <option value="Annulée">Annulée</option>
-                            </select>
-                            
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              onClick={() => setSelectedOrder(order)}
-                            >
-                              <MessageCircle className="mr-2" size={14} /> Messagerie
-                            </Button>
+                            <div className="text-gray-500 text-xs">
+                              Stock: {produit.stock} unités
+                            </div>
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        ))}
+                      </div>
+
+                      {/* Colonne Statut */}
+                      <div className="flex flex-col gap-2">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+                          order.statut === "Livrée" ? "bg-green-100 text-green-800" :
+                          order.statut === "Annulée" ? "bg-red-100 text-red-800" :
+                          order.statut === "Expédiée" ? "bg-blue-100 text-blue-800" :
+                          order.statut === "En préparation" ? "bg-yellow-100 text-yellow-800" :
+                          "bg-orange-100 text-orange-800"
+                        }`}>
+                          {order.statut}
+                        </div>
+                        <div className="text-sm">
+                          Paiement: {' '}
+                          <span className={order.paiement === 'Payé' 
+                            ? 'text-green-600' 
+                            : 'text-red-600'}>
+                            {order.paiement}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Colonne Actions */}
+                      <div className="space-y-2">
+                        <select
+                          value={order.statut}
+                          onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                          className="w-full p-1 border rounded text-sm"
+                        >
+                          <option value="En préparation">En préparation</option>
+                          <option value="En attente de stock">En attente stock</option>
+                          <option value="Expédiée">Expédiée</option>
+                          <option value="Livrée">Livrée</option>
+                          <option value="Annulée">Annulée</option>
+                        </select>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => setSelectedOrder(order)}
+                          className="w-full"
+                        >
+                          <MessageCircle className="mr-2" size={14} /> Messagerie
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
 
                 {filteredOrders.length === 0 && (
                   <div className="p-6 text-center text-gray-500">
@@ -242,43 +267,59 @@ const GestionCommandes = () => {
               </div>
             </CardContent>
           </Card>
+        </main>
 
-          {/* Modal Messagerie */}
-          {selectedOrder && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-              <div className="bg-white p-6 rounded-lg w-1/2">
-                <h3 className="text-lg font-bold mb-4">
+        {/* Messagerie Sidebar */}
+        {selectedOrder && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
+            <div className="absolute right-0 top-0 h-full w-full md:w-1/3 bg-white shadow-xl p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">
                   Messagerie - {selectedOrder.client}
                 </h3>
-                
-                <div className="h-64 overflow-y-auto mb-4 border p-2">
-                  {selectedOrder.messages.map((msg, index) => (
-                    <div key={index} className={`mb-2 p-2 rounded ${msg.sender === 'commercial' ? 'bg-blue-100 ml-4' : 'bg-gray-100 mr-4'}`}>
-                      <div className="text-sm text-gray-500">{msg.date}</div>
-                      {msg.text}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedOrder(null)}
+                >
+                  ×
+                </Button>
+              </div>
+
+              <div className="h-[calc(100vh-180px)] overflow-y-auto space-y-4 pr-4">
+                {selectedOrder.messages.map((msg: any, index: number) => (
+                  <div 
+                    key={index}
+                    className={`p-3 rounded-lg ${
+                      msg.sender === 'commercial' 
+                        ? 'bg-blue-100 ml-6' 
+                        : 'bg-gray-100 mr-6'
+                    }`}
+                  >
+                    <div className="text-xs text-gray-500 mb-1">
+                      {msg.date}
                     </div>
-                  ))}
-                </div>
-                
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Écrire un message..."
-                    className="flex-1 p-2 border rounded"
-                  />
-                  <Button onClick={() => sendMessage(selectedOrder.id)}>
-                    Envoyer
-                  </Button>
-                  <Button variant="secondary" onClick={() => setSelectedOrder(null)}>
-                    Fermer
-                  </Button>
-                </div>
+                    <div className="text-sm">{msg.text}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex gap-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Écrire un message..."
+                  className="flex-1 p-2 border rounded"
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage(selectedOrder.id)}
+                />
+                <Button onClick={() => sendMessage(selectedOrder.id)}>
+                  Envoyer
+                </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

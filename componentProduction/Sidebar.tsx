@@ -12,11 +12,30 @@ import Image from "next/image";
 
 const SidebarProduction = () => {
   const navItems = [
-    { href: "/AgentProduction/Dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
-    { href: "/AgentProduction/PlanificationProduction", icon: Factory, label: "Planification de Production" },
-    { href: "/AgentProduction/SuiviProduction", icon: ClipboardList, label: "Suivi de production" },
-    
-    { href: "/AgentProduction/DemandeProduction", icon: Gauge, label: "Demande Production" },
+    {
+      href: "/AgentProduction/Dashboard",
+      icon: LayoutDashboard,
+      label: "Tableau de bord",
+      aria: "Accéder au tableau de bord"
+    },
+    {
+      href: "/AgentProduction/PlanificationProduction",
+      icon: Factory,
+      label: "Planification de Production",
+      aria: "Planifier la production"
+    },
+    {
+      href: "/AgentProduction/SuiviProduction",
+      icon: ClipboardList,
+      label: "Suivi de production",
+      aria: "Suivre la production"
+    },
+    {
+      href: "/AgentProduction/DemandeProduction",
+      icon: Gauge,
+      label: "Demande Production",
+      aria: "Faire une demande de production"
+    },
   ];
 
   return (
@@ -26,8 +45,8 @@ const SidebarProduction = () => {
         <div className="flex justify-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-md">
             <Image 
-              src="/logo6.png" // 🔁 Remplace par le bon chemin de ton logo
-              alt="Logo"
+              src="/logo6.png"
+              alt="Logo de l'entreprise"
               width={76}
               height={76}
               className="w-full h-full object-cover"
@@ -35,7 +54,7 @@ const SidebarProduction = () => {
           </div>
         </div>
 
-        {/* En-tête Sidebar */}
+        {/* Titre de la section */}
         <div className="flex items-center gap-3 mb-6 px-2 justify-center">
           <Factory className="h-6 w-6 text-white" />
           <h2 className="text-lg font-semibold">Production</h2>
@@ -47,10 +66,11 @@ const SidebarProduction = () => {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-blue-500"
+              aria-label={item.aria}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-white"
             >
-              <item.icon className="h-5 w-5" />
-              <span className="text-white">{item.label}</span>
+              <item.icon className="h-5 w-5" aria-hidden="true" />
+              <span className="text-white font-medium">{item.label}</span>
             </Link>
           ))}
         </nav>

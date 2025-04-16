@@ -60,7 +60,7 @@ const HistoriqueCommandes = () => {
 
   const handleStatusChange = (newStatus: Order["status"]) => {
     if (selectedOrder) {
-      setOrders(orders.map(order => 
+      setOrders(orders.map(order =>
         order.id === selectedOrder.id ? { ...order, status: newStatus } : order
       ));
       addNotification(`Statut de ${selectedOrder.reference} mis à jour à "${newStatus}"`);
@@ -90,13 +90,17 @@ const HistoriqueCommandes = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <SidebarFournisseur />
-      
-      <div className="flex-1 flex flex-col">
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar fixée */}
+      <div className="fixed top-0 left-0 h-full w-64 z-40">
+        <SidebarFournisseur />
+      </div>
+
+      {/* Contenu principal */}
+      <div className="ml-64 min-h-screen flex flex-col">
         <HeaderFournisseur />
 
-        <main className="flex-1 p-6 space-y-6">
+        <main className="flex-1 p-6 space-y-6 overflow-y-auto">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">Historique des Commandes</h1>
             <div className="flex gap-4">
@@ -171,7 +175,7 @@ const HistoriqueCommandes = () => {
           </Card>
 
           {showStatusModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <Card className="w-full max-w-md">
                 <CardHeader className="relative">
                   <CardTitle>Modifier le statut</CardTitle>
@@ -203,7 +207,7 @@ const HistoriqueCommandes = () => {
             </div>
           )}
 
-          <div className="fixed bottom-4 right-4 space-y-2">
+          <div className="fixed bottom-4 right-4 space-y-2 z-50">
             {notifications.map((message, index) => (
               <div key={index} className="bg-white p-4 rounded-lg shadow-lg flex items-center gap-2">
                 <CheckCircle className="text-green-500 h-5 w-5" />
