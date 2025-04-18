@@ -1,16 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
-import { 
-  LayoutDashboard, 
-  Factory, 
-  ClipboardList, 
-  Gauge 
+import {
+  LayoutDashboard,
+  Factory,
+  ClipboardList,
+  Gauge,
+  Settings,
+  Wrench,
+  PackageCheck
 } from "lucide-react";
 import Image from "next/image";
 
 const SidebarProduction = () => {
+  const pathname = usePathname();
+
   const navItems = [
     {
       href: "/AgentProduction/Dashboard",
@@ -19,22 +25,22 @@ const SidebarProduction = () => {
       aria: "Accéder au tableau de bord"
     },
     {
-      href: "/AgentProduction/PlanificationProduction",
-      icon: Factory,
-      label: "Planification de Production",
+      href: "/AgentProduction/demandesproduction",
+      icon: Settings, // 🔄 Demander production
+      label: "Demander production",
       aria: "Planifier la production"
     },
     {
       href: "/AgentProduction/SuiviProduction",
-      icon: ClipboardList,
-      label: "Suivi de production",
-      aria: "Suivre la production"
+      icon: Wrench, // 🛠️ Gérer la production
+      label: "Gérer la production",
+      aria: "Gérer la production"
     },
     {
-      href: "/AgentProduction/DemandeProduction",
-      icon: Gauge,
-      label: "Demande Production",
-      aria: "Faire une demande de production"
+      href: "/AgentProduction/GestionProduitsFinis",
+      icon: PackageCheck, // 📦 Gérer produits finis
+      label: "Gérer produits finis",
+      aria: "Gérer les produits finis"
     },
   ];
 
@@ -44,7 +50,7 @@ const SidebarProduction = () => {
         {/* Logo circulaire */}
         <div className="flex justify-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-md">
-            <Image 
+            <Image
               src="/logo6.png"
               alt="Logo de l'entreprise"
               width={76}
@@ -62,17 +68,22 @@ const SidebarProduction = () => {
 
         {/* Navigation */}
         <nav className="space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-label={item.aria}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-white"
-            >
-              <item.icon className="h-5 w-5" aria-hidden="true" />
-              <span className="text-white font-medium">{item.label}</span>
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-label={item.aria}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                  ${isActive ? "bg-blue-700" : "hover:bg-blue-500"}
+                  focus:outline-none focus:ring-2 focus:ring-white`}
+              >
+                <item.icon className="h-5 w-5 text-white" aria-hidden="true" />
+                <span className="text-white font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </aside>
