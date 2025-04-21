@@ -109,7 +109,7 @@ const Header = () => {
       </div>
       <input
         type="text"
-        placeholder="Rechercher matières, commandes, fournisseurs..."
+        placeholder=""
         className={`pl-12 pr-4 py-3 ${styles.searchBar} text-gray-700 placeholder-gray-400 focus:border-blue-500`}
       />
     </div>

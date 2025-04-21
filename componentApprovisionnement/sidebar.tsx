@@ -38,7 +38,7 @@ const Sidebar = () => {
         <Link href="/Approvisionnement/ReceptionStock">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <FileText className="w-5 h-5" />
-            <span>Réception Stock</span>
+            <span>Gérer le Stock d’Entrée</span>
           </div>
         </Link>
 

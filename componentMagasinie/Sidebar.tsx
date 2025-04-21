@@ -65,7 +65,7 @@ const Sidebar = () => {
           }`}
         >
           <ClipboardList className="w-5 h-5" />
-          <span>Stock de Sortie</span>
+          <span> Gérer Stock Sortie</span>
         </Link>
 
         <Link

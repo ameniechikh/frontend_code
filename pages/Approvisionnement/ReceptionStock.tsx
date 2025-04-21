@@ -1,355 +1,319 @@
 import { useState } from "react";
-import { Package, ClipboardCheck, Clock, Truck, Filter, Search } from "lucide-react";
+import { Package, ClipboardCheck, Clock, Truck, Filter, Search, AlertCircle, Calendar, BarChart } from "lucide-react";
 import SidebarApprovisionnement from "../../componentApprovisionnement/Sidebar";
 import HeaderApprovisionnement from "../../componentApprovisionnement/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/Card";
 import Button from "../../componentFournisseur/Button";
+import  {Badge}  from "../../componentFournisseur/Badge";
+
+interface OrderMaterial {
+  name: string;
+  orderedQuantity: number;
+  receivedQuantity?: number;
+  condition?: "conforme" | "endommagée" | "manquante";
+}
 
 interface Order {
   id: string;
+  reference: string;
   supplier: string;
-  material: string;
-  quantity: number;
+  materials: OrderMaterial[];
   orderDate: Date;
-  status: "pending" | "in-transit" | "delivered";
-  receivedQuantity?: number;
-  condition?: "conforme" | "endommagée" | "manquante";
+  status: "Reçue" | "Partielle" | "En attente";
   receptionDate?: Date;
   proof?: string;
 }
 
-interface MaterialStock {
-  name: string;
-  quantity: number;
-}
-
 const ReceptionStock = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [receptionForm, setReceptionForm] = useState({
-    receivedQuantity: 0,
-    condition: "conforme" as "conforme" | "endommagée" | "manquante",
+  const [receptionForm, setReceptionForm] = useState<{
+    materials: { [key: string]: { received: number; condition: "conforme" | "endommagée" | "manquante" } };
+    receptionDate: string;
+    proof: string;
+  }>({
+    materials: {},
     receptionDate: new Date().toISOString().split('T')[0],
     proof: ""
-  });
-  const [filters, setFilters] = useState({
-    date: "",
-    supplier: "",
-    material: ""
   });
 
   // Données de démonstration
   const [orders, setOrders] = useState<Order[]>([
     {
-      id: "CMD-001",
-      supplier: "Fournisseur A",
-      material: "Fer 50%",
-      quantity: 100,
+      id: "1",
+      reference: "CMD-2023-001",
+      supplier: "Acier France",
+      materials: [
+        { name: "Tôle d'acier", orderedQuantity: 100 },
+        { name: "Profilés aluminium", orderedQuantity: 50 }
+      ],
       orderDate: new Date("2024-03-01"),
-      status: "pending"
-    },
-    {
-      id: "CMD-002",
-      supplier: "Fournisseur B",
-      material: "Charbon Métallurgique",
-      quantity: 50,
-      orderDate: new Date("2024-03-05"),
-      status: "in-transit"
+      status: "En attente"
     }
   ]);
 
-  const [materialsStock, setMaterialsStock] = useState<MaterialStock[]>([
-    { name: "Fer 50%", quantity: 150 },
-    { name: "Charbon Métallurgique", quantity: 30 }
-  ]);
-
-  const handleConfirmReception = () => {
+  const handleReceptionSubmit = () => {
     if (!selectedOrder) return;
 
-    const updatedOrders = orders.map(order => 
-      order.id === selectedOrder.id ? {
-        ...order,
-        status: "delivered",
-        ...receptionForm,
-        receivedQuantity: Number(receptionForm.receivedQuantity),
-        receptionDate: new Date(receptionForm.receptionDate)
-      } : order
-    );
+    const updatedMaterials = selectedOrder.materials.map(material => ({
+      ...material,
+      receivedQuantity: receptionForm.materials[material.name]?.received || 0,
+      condition: receptionForm.materials[material.name]?.condition
+    }));
 
-    // Mise à jour du stock
-    if (receptionForm.condition === "conforme") {
-      const updatedStock = materialsStock.map(material => 
-        material.name === selectedOrder.material ? {
-          ...material,
-          quantity: material.quantity + Number(receptionForm.receivedQuantity)
-        } : material
-      );
-      setMaterialsStock(updatedStock);
-    }
+    const allReceived = updatedMaterials.every(m => m.receivedQuantity === m.orderedQuantity);
+    const partialReceived = updatedMaterials.some(m => m.receivedQuantity && m.receivedQuantity < m.orderedQuantity);
 
-    setOrders(updatedOrders);
+    const updatedOrder: Order = {
+      ...selectedOrder,
+      materials: updatedMaterials,
+      status: allReceived ? "Reçue" : partialReceived ? "Partielle" : "En attente",
+      receptionDate: new Date(receptionForm.receptionDate),
+      proof: receptionForm.proof
+    };
+
+    setOrders(orders.map(o => o.id === selectedOrder.id ? updatedOrder : o));
     setSelectedOrder(null);
-    setReceptionForm({
-      receivedQuantity: 0,
-      condition: "conforme",
-      receptionDate: new Date().toISOString().split('T')[0],
-      proof: ""
-    });
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesDate = filters.date ? 
-      new Date(order.orderDate).toISOString().split('T')[0] === filters.date : true;
-    const matchesSupplier = filters.supplier ? 
-      order.supplier.toLowerCase().includes(filters.supplier.toLowerCase()) : true;
-    const matchesMaterial = filters.material ? 
-      order.material.toLowerCase().includes(filters.material.toLowerCase()) : true;
-    
-    return matchesDate && matchesSupplier && matchesMaterial;
-  });
-
-  const receptionHistory = orders.filter(order => order.status === "delivered");
+  const getStatusBadge = (status: string) => (
+    <Badge
+      variant={
+        status === "Reçue" ? "success" :
+        status === "Partielle" ? "warning" : "neutral"
+      }
+    >
+      {status}
+    </Badge>
+  );
 
   return (
-    <div className="flex h-screen">
-      <div className="w-64 fixed top-0 left-0 h-full bg-gray-800 text-white">
-        <SidebarApprovisionnement />
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      <SidebarApprovisionnement />
 
-      <div className="flex-1 ml-64 flex flex-col">
-        <div className="fixed top-0 right-0 left-64 z-50 bg-white shadow-sm">
-          <HeaderApprovisionnement />
-        </div>
+      <div className="flex-1 ml-64">
+        <HeaderApprovisionnement />
 
-        <div className="flex gap-6 p-6 flex-1 mt-16">
-          <div className="w-full space-y-6">
-            {/* Commandes en attente */}
+        <main className="p-8 space-y-8">
+          {/* Section Statistiques */}
+          <div className="grid grid-cols-4 gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="text-orange-500" /> Commandes en Cours
-                </CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium">Réceptions ce mois</CardTitle>
+                <BarChart className="h-4 w-4 text-gray-500" />
               </CardHeader>
               <CardContent>
-                <div className="flex gap-4 mb-4">
-                  <div className="flex items-center gap-2 flex-1">
-                    <Search className="text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Rechercher par fournisseur"
-                      className="p-2 border rounded-lg flex-1"
-                      onChange={(e) => setFilters({...filters, supplier: e.target.value})}
-                    />
+                <div className="text-2xl font-bold">248</div>
+                <p className="text-xs text-gray-500 mt-1">+12.5% vs mois dernier</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium">Commandes en attente</CardTitle>
+                <AlertCircle className="h-4 w-4 text-gray-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">15</div>
+                <p className="text-xs text-gray-500 mt-1">Dont 3 en retard</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium">Top Matière</CardTitle>
+                <Package className="h-4 w-4 text-gray-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">Acier INOX</div>
+                <p className="text-xs text-gray-500 mt-1">1200 tonnes reçues</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium">Prochaine livraison</CardTitle>
+                <Calendar className="h-4 w-4 text-gray-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">24/03</div>
+                <p className="text-xs text-gray-500 mt-1">Fournisseur MétalPro</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Section Principale */}
+          <div className="grid grid-cols-3 gap-8">
+            {/* Liste des Commandes */}
+            <div className="col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Truck className="h-5 w-5 text-blue-600" />
+                      Réceptions de stock
+                    </CardTitle>
+                    <div className="flex gap-2">
+                      <input
+                        type="date"
+                        className="input-sm"
+                        onChange={e => console.log(e.target.value)}
+                      />
+                      <select className="select-sm">
+                        <option>Tous statuts</option>
+                        <option>Reçue</option>
+                        <option>Partielle</option>
+                        <option>En attente</option>
+                      </select>
+                    </div>
                   </div>
-                  <input
-                    type="date"
-                    className="p-2 border rounded-lg"
-                    onChange={(e) => setFilters({...filters, date: e.target.value})}
-                  />
-                </div>
-                
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left border-b">
-                      <th className="p-3">N° Commande</th>
-                      <th className="p-3">Fournisseur</th>
-                      <th className="p-3">Matière</th>
-                      <th className="p-3">Quantité</th>
-                      <th className="p-3">Date Commande</th>
-                      <th className="p-3">Statut</th>
-                      <th className="p-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOrders
-                      .filter(order => order.status !== "delivered")
-                      .map(order => (
-                        <tr key={order.id} className="border-b hover:bg-gray-50">
-                          <td className="p-3 font-medium">{order.id}</td>
+                </CardHeader>
+                <CardContent>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-sm font-medium text-gray-500 border-b">
+                        <th className="p-3 text-left">Référence</th>
+                        <th className="p-3 text-left">Fournisseur</th>
+                        <th className="p-3 text-left">Matières</th>
+                        <th className="p-3 text-left">Quantité</th>
+                        <th className="p-3 text-left">Statut</th>
+                        <th className="p-3 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map(order => (
+                        <tr key={order.id} className="hover:bg-gray-50 border-b">
+                          <td className="p-3 font-medium">{order.reference}</td>
                           <td className="p-3">{order.supplier}</td>
-                          <td className="p-3">{order.material}</td>
-                          <td className="p-3">{order.quantity}</td>
-                          <td className="p-3">{order.orderDate.toLocaleDateString()}</td>
                           <td className="p-3">
-                            <span className={`px-2 py-1 rounded-full text-sm ${
-                              order.status === "pending" ? "bg-yellow-100 text-yellow-800" :
-                              "bg-blue-100 text-blue-800"
-                            }`}>
-                              {order.status === "pending" ? "En attente" : "En cours"}
-                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {order.materials.map(m => (
+                                <Badge key={m.name} variant="outline">
+                                  {m.name}
+                                </Badge>
+                              ))}
+                            </div>
                           </td>
                           <td className="p-3">
+                            {order.materials.map(m => (
+                              <div key={m.name} className="text-sm">
+                                {m.receivedQuantity || 0}/{m.orderedQuantity}
+                              </div>
+                            ))}
+                          </td>
+                          <td className="p-3">{getStatusBadge(order.status)}</td>
+                          <td className="p-3">
                             <Button
-                              variant="primary"
                               size="sm"
                               onClick={() => setSelectedOrder(order)}
-                              disabled={order.status === "pending"}
                             >
-                              <ClipboardCheck className="mr-2 h-4 w-4" />
-                              {order.status === "pending" ? "En attente" : "Réceptionner"}
+                              Gérer réception
                             </Button>
                           </td>
                         </tr>
                       ))}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Historique des réceptions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Truck className="text-green-500" /> Historique des Réceptions
-                </CardTitle>
-                <div className="flex gap-4 mt-4">
-                  <input
-                    type="date"
-                    className="p-2 border rounded-lg"
-                    onChange={(e) => setFilters({...filters, date: e.target.value})}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Filtrer par matière"
-                    className="p-2 border rounded-lg"
-                    onChange={(e) => setFilters({...filters, material: e.target.value})}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left border-b">
-                      <th className="p-3">Date Réception</th>
-                      <th className="p-3">Fournisseur</th>
-                      <th className="p-3">Matière</th>
-                      <th className="p-3">Quantité</th>
-                      <th className="p-3">État</th>
-                      <th className="p-3">Preuve</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {receptionHistory.map(order => (
-                      <tr key={order.id} className="border-b hover:bg-gray-50">
-                        <td className="p-3">{order.receptionDate?.toLocaleDateString()}</td>
-                        <td className="p-3">{order.supplier}</td>
-                        <td className="p-3">{order.material}</td>
-                        <td className="p-3">{order.receivedQuantity}/{order.quantity}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-1 rounded-full text-sm ${
-                            order.condition === "conforme" ? "bg-green-100 text-green-800" :
-                            order.condition === "endommagée" ? "bg-orange-100 text-orange-800" :
-                            "bg-red-100 text-red-800"
-                          }`}>
-                            {order.condition}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          {order.proof && (
-                            <a 
-                              href={order.proof} 
-                              target="_blank" 
-                              className="text-blue-500 hover:underline"
-                            >
-                              Voir document
-                            </a>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
-
-            {/* Modal de réception */}
+            {/* Formulaire de Réception */}
             {selectedOrder && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white p-6 rounded-lg w-full max-w-md">
-                  <h3 className="text-xl font-semibold mb-4">
-                    Réception pour {selectedOrder.material}
-                  </h3>
-                  <div className="space-y-4">
+              <div className="col-span-1">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ClipboardCheck className="h-5 w-5 text-green-600" />
+                      Réceptionner commande
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Quantité reçue (max {selectedOrder.quantity})
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Référence</label>
                       <input
-                        type="number"
-                        min="0"
-                        max={selectedOrder.quantity}
-                        className="w-full p-2 border rounded-lg"
-                        value={receptionForm.receivedQuantity}
-                        onChange={(e) => setReceptionForm({
-                          ...receptionForm,
-                          receivedQuantity: Math.min(Number(e.target.value), selectedOrder.quantity)
-                        })}
+                        className="input w-full"
+                        value={selectedOrder.reference}
+                        disabled
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium mb-1">État</label>
-                      <select
-                        className="w-full p-2 border rounded-lg"
-                        value={receptionForm.condition}
-                        onChange={(e) => setReceptionForm({
-                          ...receptionForm,
-                          condition: e.target.value as any
-                        })}
-                      >
-                        <option value="conforme">Conforme</option>
-                        <option value="endommagée">Endommagée</option>
-                        <option value="manquante">Manquante</option>
-                      </select>
-                    </div>
+                    {selectedOrder.materials.map(material => (
+                      <div key={material.name} className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {material.name} (max {material.orderedQuantity})
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            className="input flex-1"
+                            min="0"
+                            max={material.orderedQuantity}
+                            onChange={e => setReceptionForm({
+                              ...receptionForm,
+                              materials: {
+                                ...receptionForm.materials,
+                                [material.name]: {
+                                  received: Number(e.target.value),
+                                  condition: receptionForm.materials[material.name]?.condition || "conforme"
+                                }
+                              }
+                            })}
+                          />
+                          <select
+                            className="select"
+                            onChange={e => setReceptionForm({
+                              ...receptionForm,
+                              materials: {
+                                ...receptionForm.materials,
+                                [material.name]: {
+                                  received: receptionForm.materials[material.name]?.received || 0,
+                                  condition: e.target.value as any
+                                }
+                              }
+                            })}
+                          >
+                            <option value="conforme">Conforme</option>
+                            <option value="endommagée">Endommagé</option>
+                            <option value="manquante">Manquant</option>
+                          </select>
+                        </div>
+                      </div>
+                    ))}
 
                     <div>
-                      <label className="block text-sm font-medium mb-1">Date de réception</label>
-                      <input
-                        type="date"
-                        className="w-full p-2 border rounded-lg"
-                        value={receptionForm.receptionDate}
-                        onChange={(e) => setReceptionForm({
-                          ...receptionForm,
-                          receptionDate: e.target.value
-                        })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Justificatif (PDF/image)
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Bon de livraison</label>
                       <input
                         type="file"
-                        className="w-full p-2 border rounded-lg"
-                        onChange={(e) => setReceptionForm({
+                        className="file-input w-full"
+                        onChange={e => setReceptionForm({
                           ...receptionForm,
                           proof: e.target.files?.[0]?.name || ""
                         })}
                       />
                     </div>
 
-                    <div className="flex gap-2 justify-end mt-6">
-                      <Button 
-                        variant="outline" 
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
                         onClick={() => setSelectedOrder(null)}
                       >
                         Annuler
                       </Button>
-                      <Button 
+                      <Button
                         variant="primary"
-                        onClick={handleConfirmReception}
-                        disabled={receptionForm.receivedQuantity <= 0}
+                        className="flex-1"
+                        onClick={handleReceptionSubmit}
                       >
-                        Confirmer la réception
+                        Valider la réception
                       </Button>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
