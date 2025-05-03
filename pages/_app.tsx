@@ -2,6 +2,8 @@ import "../styles/globals.css"; // ✅ Import du fichier de styles global
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import io from "socket.io-client";
+import { ApolloProvider } from "@apollo/client";
+import { client } from "../lib/apollo";
 
 // Connexion au backend Socket.io
 const socket = io("http://localhost:5000"); // Remplace par ton URL backend si nécessaire
@@ -36,11 +38,13 @@ export default function App({ Component, pageProps }) {
 
   return (
     // Passer les props à chaque composant de la page
-    <Component
+    <ApolloProvider client={client}>
+       <Component
       {...pageProps}
       socket={socket}
       notifications={notifications}
       messages={messages}
     />
+    </ApolloProvider>
   );
 }
