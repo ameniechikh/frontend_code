@@ -1,58 +1,160 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Edit, Trash, PlusCircle, Search, Unlock } from "lucide-react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
+import { useMutation, useQuery } from "@apollo/client";
+import { FIND_USERS } from "../graphql/users/user.queries";
+import { CREATE_USER, DELETE_USER, UPDATE_USER } from "../graphql/users/user.mutations";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+export type UserStatus = "Actif" | "Inactif";
+export type UserRole =
+  | "Admin"
+  | "Agent production"
+  | "Agent approvisionnement"
+  | "Agent magasinier"
+  | "Fournisseur"
+  | "Client";
+
+export interface User {
+  id: string | null;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+}
 
 const roles = [
-  "Agent Production",
+  "Agent production",
   "Agent approvisionnement",
   "Agent magasinier",
   "Fournisseur",
   "Client",
 ];
 
-const initialUsers = [
-  { id: 1, name: "Admin", email: "admin@smartsteel.com", role: "Admin", status: "Actif" },
-  { id: 2, name: "Ali Ben Salah", email: "ali.ben@smartsteel.com", role: "Agent commercial", status: "Inactif" },
-  { id: 3, name: "Nadia Trabelsi", email: "nadia.trabelsi@smartsteel.com", role: "Client", status: "Actif" },
-];
-
 const User = () => {
-  const [users, setUsers] = useState(initialUsers);
+  const { data } = useQuery(FIND_USERS);
+
+  useEffect(() => {
+    if (data?.users) {
+      setUsers(data.users);
+    }
+  }, [data]);
+
+  const [users, setUsers] = useState<User[]>(data?.users || []);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [newUser, setNewUser] = useState({ id: null, name: "", email: "", role: "Client", status: "Actif" });
+  const [newUser, setNewUser] = useState<User>({
+    id: null,
+    name: "",
+    email: "",
+    role: "Client",
+    status: "Actif",
+  });
 
-  // Filtrer les utilisateurs
-  const filteredUsers = users.filter(user => user.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  // Ajouter ou Modifier un utilisateur
-  const handleSaveUser = () => {
-    if (newUser.id) {
-      setUsers(users.map(user => (user.id === newUser.id ? newUser : user)));
-    } else {
-      setUsers([...users, { ...newUser, id: users.length + 1 }]);
+  // GraphQL Mutations
+  const [createUserMutation] = useMutation(CREATE_USER);
+  const [updateUserMutation] = useMutation(UPDATE_USER);
+  const [deleteUser] = useMutation(DELETE_USER, { refetchQueries: [FIND_USERS] });
+
+  const getUserRole = (role: string): string => {
+      switch (role) {
+        case "Admin":
+          return "ADMIN";
+        case "Agent production":
+          return "AGENT_PRODUCTION";
+        case "Agent approvisionnement":
+          return "AGENT_APPROVISIONNEMENT";
+        case "Agent magasinier":
+          return "AGENT_MAGASINIER";
+        case "Fournisseur":
+          return "FOURNISSEUR";
+        case "Client":
+          return "CLIENT";
+        default:
+          return newUser.role;
+      }
+  }
+
+  const handleSaveUser = async (userToSave?: User) => {
+     const user = userToSave || newUser;
+
+     console.log(user);
+    try {
+      const input = {
+        name: user.name,
+        email: user.email,
+        role: getUserRole(user.role),
+        status: user.status.toUpperCase(),
+      };
+
+      if (user.id) {
+        // Update existing user
+        const { data } = await updateUserMutation({
+          variables: { input: { ...input, id: user.id } },
+        });
+
+        if (data?.user) {
+          console.log(users, data.user);
+          // setUsers(
+          //   users.map(user =>
+          //     user.id === user.id ? data.user : user
+          //   )
+          // );
+          toast.success("Utilisateur mis à jour avec succès!");
+        }
+      } else {
+        // Create new user
+        const { data } = await createUserMutation({
+          variables: {
+            input,
+          },
+        });
+
+        if (data?.user) {
+          setUsers([...users, data.user]);
+          toast.success("Utilisateur créé avec succès!");
+        }
+      }
+
+      // Reset form state
+      setShowForm(false);
+      setNewUser({ id: null, name: "", email: "", role: "Client", status: "Actif" });
+    } catch (err) {
+      console.error("Erreur lors de la sauvegarde de l'utilisateur:", err);
+      toast.error("Une erreur est survenue lors de la sauvegarde de l'utilisateur.");
     }
-    setShowForm(false);
-    setNewUser({ id: null, name: "", email: "", role: "Client", status: "Actif" });
   };
 
-  // Supprimer un utilisateur
-  const handleDeleteUser = (id) => {
+  const handleDeleteUser = (id: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-      setUsers(users.filter(user => user.id !== id));
+      deleteUser({ variables: { id } })
+        .then(() => {
+          console.log("Utilisateur supprimé avec succès");
+          toast.success("Utilisateur supprimé avec succès!");
+        })
+        .catch(err => {
+          console.error("Erreur lors de la suppression de l'utilisateur:", err);
+          toast.error("Une erreur est survenue lors de la suppression de l'utilisateur.");
+        });
     }
   };
 
-  // Activer/Désactiver un utilisateur
-  const toggleUserStatus = (id) => {
-    setUsers(users.map(user => user.id === id ? { ...user, status: user.status === "Actif" ? "Inactif" : "Actif" } : user));
+  const toggleUserStatus = (user: User) => {
+    console.log(user);
+    const newUserStatus = user!.status === "Actif" ? "Inactif" : "Actif";
+    handleSaveUser({...user!, status: newUserStatus });
   };
 
-  // Réinitialiser le mot de passe
-  const resetPassword = (id) => {
-    alert(`Mot de passe réinitialisé pour l'utilisateur ID ${id}`);
+  const resetPassword = (id: string) => {
+    // TODO : Implement password reset logic
+    toast.info(`Mot de passe réinitialisé pour l'utilisateur ID ${id}`);
   };
 
   return (
@@ -81,7 +183,7 @@ const User = () => {
               placeholder="Rechercher un utilisateur..."
               className="pl-10 p-2 border rounded w-full"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
             />
           </div>
 
@@ -102,12 +204,13 @@ const User = () => {
                     <td className="p-3">{user.name}</td>
                     <td className="p-3">{user.email}</td>
                     <td className="p-3">{user.role}</td>
-                    <td className={`p-3 font-bold ${user.status === "Actif" ? "text-green-600" : "text-red-600"}`}>{user.status}</td>
+                    <td className={`p-3 font-bold ${user.status === "Actif" ? "text-green-600" : "text-red-600"}`}
+                    onClick={() => toggleUserStatus(user)}
+                    >{user.status}</td>
                     <td className="p-3 text-center">
                       <button onClick={() => { setNewUser(user); setShowForm(true); }} className="text-blue-500 mr-3"><Edit /></button>
-                      <button onClick={() => toggleUserStatus(user.id)} className="text-yellow-500 mr-3">🔄</button>
-                      <button onClick={() => resetPassword(user.id)} className="text-purple-500 mr-3"><Unlock /></button>
-                      <button onClick={() => handleDeleteUser(user.id)} className="text-red-500"><Trash /></button>
+                      <button onClick={() => resetPassword(user.id!)} className="text-purple-500 mr-3"><Unlock /></button>
+                      <button onClick={() => handleDeleteUser(user.id!)} className="text-red-500"><Trash /></button>
                     </td>
                   </tr>
                 ))}
@@ -119,17 +222,18 @@ const User = () => {
             <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
               <div className="bg-white p-6 rounded shadow-lg w-96">
                 <h3 className="text-xl font-bold mb-4">{newUser.id ? "Modifier" : "Ajouter"} Utilisateur</h3>
-                <input type="text" placeholder="Nom" className="w-full p-2 border mb-3 rounded" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} />
-                <input type="email" placeholder="Email" className="w-full p-2 border mb-3 rounded" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
-                <select className="w-full p-2 border mb-3 rounded" value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>{roles.map(role => <option key={role}>{role}</option>)}</select>
+                <input type="text" placeholder="Nom" className="w-full p-2 border mb-3 rounded" value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} />
+                <input type="email" placeholder="Email" className="w-full p-2 border mb-3 rounded" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} />
+                <select className="w-full p-2 border mb-3 rounded" value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })}>{roles.map(role => <option key={role}>{role}</option>)}</select>
                 <button onClick={() => setShowForm(false)} className="bg-gray-400 px-4 py-2 rounded text-white">Annuler</button>
-                <button onClick={handleSaveUser} className="bg-blue-500 px-4 py-2 rounded text-white ml-2">Enregistrer</button>
+                <button onClick={() => handleSaveUser()} className="bg-blue-500 px-4 py-2 rounded text-white ml-2">Enregistrer</button>
               </div>
             </div>
           )}
         </div>
         <Footer />
       </div>
+      <ToastContainer />
     </div>
   );
 };
