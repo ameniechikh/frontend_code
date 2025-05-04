@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar, Line, Doughnut } from "react-chartjs-2";
 import { 
-  Package, ClipboardList, Truck, FileText, AlertCircle, 
-  PlusCircle, Zap, Box, TrendingUp, Database
+  Package, AlertTriangle, Truck, ClipboardList, 
+  Bell, Factory, CheckCircle 
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -15,7 +15,8 @@ import {
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 } from "chart.js";
 import Sidebar from "../../componentApprovisionnement/Sidebar";
 import Header from "../../componentApprovisionnement/Header";
@@ -28,54 +29,57 @@ ChartJS.register(
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
 
 const Dashboard = () => {
-  // Données du graphique de stock
-  const stockData = {
-    labels: ["Acier", "Aluminium", "Cuivre", "Plastique", "Coke"],
+  // Données des graphiques
+  const stockHistoryData = {
+    labels: ["24/04", "23/04", "22/04", "21/04", "20/04", "19/04", "18/04"],
     datasets: [
       {
-        label: "Stock Actuel (Tonnes)",
-        data: [1500, 800, 450, 2000, 1200],
-        backgroundColor: 'rgba(99, 102, 241, 0.8)',
-        borderRadius: 8,
+        label: "Zinc brut",
+        data: [450, 600, 550, 700, 800, 750, 900],
+        borderColor: '#3B82F6',
+        tension: 0.4
+      },
+      {
+        label: "Acier galvanisé",
+        data: [150, 300, 400, 350, 200, 250, 300],
+        borderColor: '#F59E0B',
+        tension: 0.4
+      },
+      {
+        label: "Aluminium",
+        data: [2200, 2000, 1800, 2100, 1900, 2300, 2400],
+        borderColor: '#10B981',
+        tension: 0.4
       }
     ]
   };
 
-  // Nouveau graphique de tendances
-  const trendData = {
-    labels: ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"],
-    datasets: [
-      {
-        label: "Demande Mensuelle (Tonnes)",
-        data: [650, 590, 800, 810, 560, 550],
-        borderColor: 'rgba(16, 185, 129, 0.8)',
-        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-        tension: 0.4,
-        fill: true
-      }
-    ]
+  const stockDistributionData = {
+    labels: ["Zinc brut", "Aluminium", "Acier galvanisé"],
+    datasets: [{
+      data: [25, 50, 25],
+      backgroundColor: ['#3B82F6', '#10B981', '#F59E0B']
+    }]
+  };
+
+  const alertsData = {
+    labels: ["MP001", "MP003"],
+    datasets: [{
+      label: "Alertes de seuil",
+      data: [3, 4],
+      backgroundColor: ['#EF4444']
+    }]
   };
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: { position: "top" },
-      title: { display: false }
-    },
-    scales: {
-      y: {
-        grid: { color: 'rgba(0, 0, 0, 0.05)' },
-        beginAtZero: true
-      },
-      x: {
-        grid: { display: false }
-      }
-    }
+    plugins: { legend: { position: "top" } }
   };
 
   return (
@@ -85,121 +89,223 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col ml-64">
         <Header />
 
-        <main className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 mt-16">
-          {/* Section Statistiques */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+        <main className="p-6 bg-gray-50 mt-16 space-y-6">
+          {/* Section KPI */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white p-4 rounded-lg border border-blue-200">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-indigo-100 rounded-xl">
-                  <Package className="text-indigo-600 h-6 w-6"/>
-                </div>
+                <Package className="text-blue-500 h-6 w-6"/>
                 <div>
-                  <p className="text-gray-500 text-sm">Stock Total</p>
-                  <p className="text-2xl font-bold text-gray-800">4,250T</p>
+                  <p className="text-sm text-gray-500">Stock total matières</p>
+                  <p className="text-2xl font-bold">12 400 kg</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+            <div className="bg-white p-4 rounded-lg border border-orange-200">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <ClipboardList className="text-green-600 h-6 w-6"/>
-                </div>
+                <AlertTriangle className="text-orange-500 h-6 w-6"/>
                 <div>
-                  <p className="text-gray-500 text-sm">Commandes en cours</p>
-                  <p className="text-2xl font-bold text-gray-800">12</p>
+                  <p className="text-sm text-gray-500">Matières sous seuil</p>
+                  <p className="text-2xl font-bold">3</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+            <div className="bg-white p-4 rounded-lg border border-blue-200">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <FileText className="text-purple-600 h-6 w-6"/>
-                </div>
+                <Truck className="text-blue-500 h-6 w-6"/>
                 <div>
-                  <p className="text-gray-500 text-sm">Factures impayées</p>
-                  <p className="text-2xl font-bold text-gray-800">3</p>
+                  <p className="text-sm text-gray-500">Réceptions aujourd'hui</p>
+                  <p className="text-2xl font-bold">2</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+            <div className="bg-white p-4 rounded-lg border border-blue-200">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-red-100 rounded-xl">
-                  <AlertCircle className="text-red-600 h-6 w-6"/>
-                </div>
+                <ClipboardList className="text-blue-500 h-6 w-6"/>
                 <div>
-                  <p className="text-gray-500 text-sm">Alertes stock</p>
-                  <p className="text-2xl font-bold text-gray-800">2</p>
+                  <p className="text-sm text-gray-500">Demandes de production</p>
+                  <p className="text-2xl font-bold">5</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section Tableaux */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Tableau Stock */}
+            <div className="bg-white p-4 rounded-lg border">
+              <h3 className="font-semibold mb-4">État du stock des matières premières</h3>
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-sm text-gray-500 border-b">
+                    <th className="pb-2">Code</th>
+                    <th className="pb-2">Matière</th>
+                    <th className="pb-2">Stock actuel</th>
+                    <th className="pb-2">Seuil min.</th>
+                    <th className="pb-2">Fournisseur</th>
+                    <th className="pb-2">Dernière entrée</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b bg-red-50">
+                    <td className="py-2">MP001</td>
+                    <td>Zinc brut</td>
+                    <td>450 kg</td>
+                    <td>500 kg</td>
+                    <td>ZincPro</td>
+                    <td>24/04/2025</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2">MP002</td>
+                    <td>Bobine aluminium</td>
+                    <td>2200 kg</td>
+                    <td>1000 kg</td>
+                    <td>AluSteel</td>
+                    <td>24/04/2025</td>
+                  </tr>
+                  <tr className="bg-red-50">
+                    <td className="py-2">MP003</td>
+                    <td>Acier galvanisé</td>
+                    <td>150 kg</td>
+                    <td>400 kg</td>
+                    <td>FerTun</td>
+                    <td>23/04/2025</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Réceptions récentes */}
+            <div className="bg-white p-4 rounded-lg border">
+              <h3 className="font-semibold mb-4">Réceptions récentes</h3>
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-sm text-gray-500 border-b">
+                    <th className="pb-2">Réf</th>
+                    <th className="pb-2">Fournisseur</th>
+                    <th className="pb-2">Matière</th>
+                    <th className="pb-2">Qté</th>
+                    <th className="pb-2">Date</th>
+                    <th className="pb-2">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="py-2">REC0021</td>
+                    <td>ZincPro</td>
+                    <td>Zinc brut</td>
+                    <td>300 kg</td>
+                    <td>24/04/2025</td>
+                    <td><CheckCircle className="text-green-500 inline"/></td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">REC0020</td>
+                    <td>AluSteel</td>
+                    <td>Aluminium</td>
+                    <td>1200 kg</td>
+                    <td>23/04/2025</td>
+                    <td>
+                      <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">
+                        Valider
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Section Demandes + Alertes */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Demandes production */}
+            <div className="bg-white p-4 rounded-lg border">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">Demandes de production</h3>
+                <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                  + Nouvelle
+                </button>
+              </div>
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-sm text-gray-500 border-b">
+                    <th className="pb-2">Réf</th>
+                    <th className="pb-2">Produit</th>
+                    <th className="pb-2">Matière</th>
+                    <th className="pb-2">Qté</th>
+                    <th className="pb-2">État</th>
+                    <th className="pb-2">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="py-2">DP0012</td>
+                    <td>Fer plat</td>
+                    <td>Zinc brut</td>
+                    <td>600 kg</td>
+                    <td><span className="text-yellow-500">🟡 En attente</span></td>
+                    <td>24/04/2025</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">DP0011</td>
+                    <td>Bobine acier</td>
+                    <td>Acier</td>
+                    <td>800 kg</td>
+                    <td><CheckCircle className="text-green-500 inline"/></td>
+                    <td>23/04/2025</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Alertes */}
+            <div className="bg-white p-4 rounded-lg border">
+              <h3 className="font-semibold mb-4">Alertes en temps réel</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-red-50 rounded">
+                  <Bell className="text-red-500 mt-1 h-5 w-5"/>
+                  <div>
+                    <div className="text-sm font-medium">10:00 - Stock Zinc</div>
+                    <div className="text-sm text-gray-500">Seuil minimal dépassé (500kg)</div>
+                    <button className="text-blue-500 text-sm mt-1">
+                      Créer demande de production →
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 bg-blue-50 rounded">
+                  <Bell className="text-blue-500 mt-1 h-5 w-5"/>
+                  <div>
+                    <div className="text-sm font-medium">11:15 - Réception</div>
+                    <div className="text-sm text-gray-500">Validation en attente</div>
+                    <button className="text-blue-500 text-sm mt-1">
+                      Vérifier la livraison →
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Section Graphiques */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Graphique de stock */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <Database className="text-indigo-600 h-6 w-6"/>
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">Niveaux de Stock</h2>
-              </div>
-              <div className="h-80">
-                <Bar data={stockData} options={chartOptions} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded-lg border">
+              <h4 className="text-sm font-semibold mb-3">Historique des stocks (7j)</h4>
+              <div className="h-48">
+                <Line data={stockHistoryData} options={chartOptions} />
               </div>
             </div>
-
-            {/* Graphique de tendances */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <TrendingUp className="text-green-600 h-6 w-6"/>
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">Tendance des Demandes</h2>
-              </div>
-              <div className="h-80">
-                <Line data={trendData} options={chartOptions} />
+            <div className="bg-white p-4 rounded-lg border">
+              <h4 className="text-sm font-semibold mb-3">Répartition du stock</h4>
+              <div className="h-48">
+                <Doughnut data={stockDistributionData} options={chartOptions} />
               </div>
             </div>
-          </div>
-
-          {/* Section Analyse Rapide */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white">
-              <div className="flex items-center gap-3 mb-4">
-                <Truck className="h-8 w-8"/>
-                <h3 className="text-lg font-semibold">Livraisons en Transit</h3>
-              </div>
-              <div className="text-3xl font-bold mb-2">5</div>
-              <p className="text-indigo-100 text-sm">Dernière mise à jour: 2h</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <Box className="text-green-600 h-8 w-8"/>
-                <h3 className="text-lg font-semibold text-gray-800">Stock Optimal</h3>
-              </div>
-              <div className="text-3xl font-bold mb-2 text-gray-800">78%</div>
-              <p className="text-gray-500 text-sm">Moyenne sectorielle: 65%</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <Zap className="text-yellow-600 h-8 w-8"/>
-                <h3 className="text-lg font-semibold text-gray-800">Activité Récente</h3>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Nouvelles commandes</span>
-                  <span className="font-semibold">3</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Réceptions stock</span>
-                  <span className="font-semibold">2</span>
-                </div>
+            <div className="bg-white p-4 rounded-lg border">
+              <h4 className="text-sm font-semibold mb-3">Alertes de seuil</h4>
+              <div className="h-48">
+                <Bar data={alertsData} options={chartOptions} />
               </div>
             </div>
           </div>

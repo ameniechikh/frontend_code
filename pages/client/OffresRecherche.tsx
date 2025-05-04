@@ -111,7 +111,7 @@ const OffresRecherche = () => {
       </div>
 
       <div className="ml-64">
-        <div className="fixed top-0 w-[calc(100%-16rem)] bg-white z-40 shadow-sm">
+        <div className="fixed top-0 w-[calc(100%-16rem)] bg-white z-30 shadow-sm">
           <Header cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} />
         </div>
 
