@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Utilise next/navigation au lieu de next/router
+import { useRouter } from "next/router";
 import axios from "axios";
 
 const AuthPage = () => {
@@ -11,76 +11,123 @@ const AuthPage = () => {
     phoneNumber: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
+    setError("");
   };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    setError("");
 
-    if (isLogin) {
-      if (!formData.email || !formData.password) {
-        setMessage("Veuillez remplir tous les champs !");
-        return;
-      }
+    try {
+      if (isLogin) {
+        if (!formData.email || !formData.password) {
+          setError("Veuillez remplir tous les champs !");
+          setLoading(false);
+          return;
+        }
 
-      try {
-        const response = await axios.post("http://localhost:3000/login/client", {
-          email: formData.email,
-          password: formData.password
+        const response = await axios.post("http://localhost:4000/graphql", {
+          query: `
+            mutation Login($input: LoginInput!) {
+              login(input: $input)
+            }
+          `,
+          variables: {
+            input: {
+              email: formData.email,
+              password: formData.password,
+            },
+          },
         });
-        localStorage.setItem("token", response.data.token); // Stocker le token
-        setMessage("Connexion réussie !");
-        setTimeout(() => router.push("/shop"), 1500); // Rediriger vers /shop
-      } catch (err: any) {
-        setMessage(err.response?.data?.error || "Erreur lors de la connexion");
-      }
-    } else {
-      const requiredFields = [
-        formData.firstName,
-        formData.lastName,
-        formData.address,
-        formData.phoneNumber,
-        formData.email,
-        formData.password,
-        formData.confirmPassword
-      ];
 
-      if (requiredFields.some(field => !field)) {
-        setMessage("Veuillez remplir tous les champs !");
-        return;
-      }
+        if (response.data.data.login) {
+          setMessage(response.data.data.login);
+          setTimeout(() => {
+            router.push("/client/home");
+          }, 1500);
+        }
+      } else {
+        const requiredFields = [
+          formData.firstName,
+          formData.lastName,
+          formData.address,
+          formData.phoneNumber,
+          formData.email,
+          formData.password,
+          formData.confirmPassword,
+        ];
 
-      if (formData.password !== formData.confirmPassword) {
-        setMessage("Les mots de passe ne correspondent pas !");
-        return;
-      }
+        if (requiredFields.some((field) => !field)) {
+          setError("Veuillez remplir tous les champs !");
+          setLoading(false);
+          return;
+        }
 
-      if (!/^\d{8}$/.test(formData.phoneNumber)) { // Ajusté à 8 chiffres
-        setMessage("Numéro de téléphone invalide (8 chiffres requis, par exemple : 22345678)");
-        return;
-      }
+        if (formData.password !== formData.confirmPassword) {
+          setError("Les mots de passe ne correspondent pas !");
+          setLoading(false);
+          return;
+        }
 
-      try {
-        const response = await axios.post("http://localhost:3000/register", {
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phoneNumber,
-          name: `${formData.firstName} ${formData.lastName}`.trim()
+        if (!/^\d{8}$/.test(formData.phoneNumber)) {
+          setError("Numéro de téléphone invalide (8 chiffres requis)");
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.post("http://localhost:4000/graphql", {
+          query: `
+            mutation CreateUser($input: CreateUserInput!) {
+              createUser(input: $input) {
+                message
+                user {
+                  email
+                  firstName
+                  lastName
+                }
+              }
+            }
+          `,
+          variables: {
+            input: {
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              address: formData.address,
+              phoneNumber: formData.phoneNumber,
+              email: formData.email,
+              password: formData.password,
+            },
+          },
         });
-        setMessage("Inscription réussie !");
-        setTimeout(() => router.push("/login"), 1500); // Rediriger vers /login après inscription
-      } catch (err: any) {
-        setMessage(err.response?.data?.error || "Erreur lors de l'inscription");
+
+        if (response.data.data.createUser.message) {
+          setMessage(response.data.data.createUser.message);
+          setTimeout(() => {
+            router.push("/client/home");
+          }, 1500);
+        }
       }
+    } catch (err: any) {
+      setError(
+        err.response?.data?.errors?.[0]?.message ||
+          "Une erreur est survenue. Veuillez réessayer."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,8 +137,10 @@ const AuthPage = () => {
         <h2 className="text-2xl font-bold text-center mb-4">
           {isLogin ? "Connexion" : "Inscription"}
         </h2>
-        {message && <p className="text-center mb-4 text-red-600">{message}</p>}
-        
+        {message && <p className="text-green-600 text-center">{message}</p>}
+        {error && <p className="text-red-600 text-center">{error}</p>}
+        {loading && <p className="text-blue-600 text-center">Chargement...</p>}
+
         <form onSubmit={handleAuth} className="space-y-4">
           {!isLogin && (
             <>
@@ -103,7 +152,6 @@ const AuthPage = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                   />
                 </div>
@@ -114,7 +162,6 @@ const AuthPage = () => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                   />
                 </div>
@@ -127,7 +174,6 @@ const AuthPage = () => {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  required
                   className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                 />
               </div>
@@ -139,9 +185,8 @@ const AuthPage = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
-                  pattern="^\d{8}$"
-                  title="8 chiffres requis (par exemple : 0612345678)"
-                  required
+                  pattern="\d{8}"
+                  title="8 chiffres requis"
                   className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                 />
               </div>
@@ -172,7 +217,7 @@ const AuthPage = () => {
                 className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
               />
             </div>
-            
+
             {!isLogin && (
               <div>
                 <label className="block text-gray-700">Confirmation</label>
@@ -181,7 +226,6 @@ const AuthPage = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  required
                   className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                 />
               </div>
@@ -190,7 +234,10 @@ const AuthPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={loading}
+            className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {isLogin ? "Se connecter" : "S'inscrire"}
           </button>
@@ -209,7 +256,20 @@ const AuthPage = () => {
 
         <div className="text-center mt-4">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setFormData({
+                firstName: "",
+                lastName: "",
+                address: "",
+                phoneNumber: "",
+                email: "",
+                password: "",
+                confirmPassword: "",
+              });
+              setMessage("");
+              setError("");
+            }}
             className="text-blue-600 text-sm hover:underline"
           >
             {isLogin ? "Créer un compte" : "Déjà un compte ? Se connecter"}
