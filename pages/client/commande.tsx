@@ -66,10 +66,10 @@ const Commande = () => {
         </div>
 
         <button
-          onClick={() => router.push("/client/paiement")}
+          onClick={() => router.push("/client/home")}
           className="mt-6 w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors"
         >
-          Procéder au paiement
+          Passer  commande
         </button>
       </div>
     </div>

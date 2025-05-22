@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   ClipboardList, Play, Pause, Check, Eye, AlertTriangle, 
   Wrench, PlusCircle, FileText, Clock, TrendingUp, 
-  Package, Calendar, User, ChevronDown, Search, Filter,X
+  Package, Calendar, User, ChevronDown, Search, Filter, X
 } from "lucide-react";
 import Sidebar from "../../componentProduction/Sidebar";
 import Header from "../../componentProduction/Header";
@@ -206,15 +206,26 @@ const ProductionManagementPage = () => {
   const [orders, setOrders] = useState<ProductionOrder[]>(initialProductionOrders);
   const [selectedOrder, setSelectedOrder] = useState<ProductionOrder | null>(null);
   const [selectedStep, setSelectedStep] = useState<ProductionStep | null>(null);
-  const [newReport, setNewReport] = useState({
-    quantityProduced: 0,
-    issues: "",
-    machineDowntime: 0,
-    observations: ""
-  });
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+
+  // Define expected durations for each step type (in milliseconds)
+  const expectedDurations: { [key: string]: number } = {
+    "Préparation": 1 * 60 * 60 * 1000, // 1 hour
+    "Lancement": 2 * 60 * 60 * 1000,   // 2 hours
+    "Contrôle Qualité": 1 * 60 * 60 * 1000, // 1 hour
+    "Finalisation": 30 * 60 * 1000     // 30 minutes
+  };
+
+  // Function to check if a step is delayed
+  const isStepDelayed = (step: ProductionStep) => {
+    if (!step.startTime || step.progress === 100) return false;
+    const expectedDuration = expectedDurations[step.name];
+    if (!expectedDuration) return false;
+    const timeElapsed = Date.now() - step.startTime.getTime();
+    return timeElapsed > expectedDuration;
+  };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -256,14 +267,12 @@ const ProductionManagementPage = () => {
         const stepIndex = steps.findIndex(s => s.id === stepId);
         
         if (stepIndex >= 0) {
-          // Marquer l'étape actuelle comme terminée
           steps[stepIndex] = {
             ...steps[stepIndex],
             progress: 100,
             endTime: now
           };
           
-          // Démarrer l'étape suivante si elle existe
           if (stepIndex < steps.length - 1) {
             steps[stepIndex + 1] = {
               ...steps[stepIndex + 1],
@@ -272,7 +281,6 @@ const ProductionManagementPage = () => {
               progress: 0
             };
           } else {
-            // Toutes les étapes sont terminées
             return { ...order, steps, status: "Terminée" };
           }
         }
@@ -281,33 +289,6 @@ const ProductionManagementPage = () => {
       }
       return order;
     }));
-  };
-
-  const addDailyReport = (orderId: string) => {
-    const report = {
-      date: new Date(),
-      quantityProduced: newReport.quantityProduced,
-      issues: newReport.issues.split('\n').filter(i => i.trim()),
-      machineDowntime: newReport.machineDowntime,
-      observations: newReport.observations
-    };
-
-    setOrders(orders.map(order => {
-      if (order.id === orderId) {
-        return {
-          ...order,
-          dailyReports: [...(order.dailyReports || []), report]
-        };
-      }
-      return order;
-    }));
-
-    setNewReport({
-      quantityProduced: 0,
-      issues: "",
-      machineDowntime: 0,
-      observations: ""
-    });
   };
 
   const filteredOrders = orders.filter(order => {
@@ -408,11 +389,6 @@ const ProductionManagementPage = () => {
                   <ChevronDown className="h-4 w-4 text-gray-400" />
                 </div>
               </div>
-              
-              <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Nouveau rapport
-              </button>
             </div>
           </div>
 
@@ -438,6 +414,9 @@ const ProductionManagementPage = () => {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Responsable
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Retard
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -471,6 +450,16 @@ const ProductionManagementPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {order.lineManager || "-"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {order.steps.some(isStepDelayed) ? (
+                            <span className="flex items-center text-red-600">
+                              <AlertTriangle className="h-4 w-4 mr-1" />
+                              Retard
+                            </span>
+                          ) : (
+                            <span className="text-green-600">À l'heure</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
@@ -532,9 +521,14 @@ const ProductionManagementPage = () => {
                       .map(order => (
                         <div 
                           key={order.id} 
-                          className="bg-white p-3 rounded-md shadow-xs border border-gray-200 cursor-pointer hover:border-blue-300"
+                          className="bg-white p-3 rounded-md shadow-xs border border-gray-200 cursor-pointer hover:border-blue-300 relative"
                           onClick={() => setSelectedOrder(order)}
                         >
+                          {order.steps.some(isStepDelayed) && (
+                            <span className="absolute top-2 right-2 text-red-500">
+                              <AlertTriangle className="h-4 w-4" />
+                            </span>
+                          )}
                           <div className="flex justify-between items-start">
                             <h4 className="font-medium text-gray-900">{order.id}</h4>
                             <span className="text-xs text-gray-500">
@@ -581,6 +575,12 @@ const ProductionManagementPage = () => {
                         <span className={`px-2 py-1 text-xs font-medium rounded-full mr-3 ${getStatusColor(selectedOrder.status)}`}>
                           {selectedOrder.status}
                         </span>
+                        {selectedOrder.steps.some(isStepDelayed) && (
+                          <span className="ml-3 text-red-500 flex items-center">
+                            <AlertTriangle className="h-4 w-4 mr-1" />
+                            En retard
+                          </span>
+                        )}
                         <span className="text-sm text-gray-500">
                           <Calendar className="h-4 w-4 inline-block mr-1" />
                           {selectedOrder.startDate.toLocaleDateString()}
@@ -638,6 +638,13 @@ const ProductionManagementPage = () => {
                                 </div>
                               )}
                             </div>
+                            
+                            {isStepDelayed(step) && (
+                              <span className="text-red-500 text-sm flex items-center mt-2">
+                                <AlertTriangle className="h-4 w-4 mr-1" />
+                                En retard
+                              </span>
+                            )}
                             
                             {step.issues && step.issues.length > 0 && (
                               <div className="mt-2 text-sm">
@@ -722,71 +729,6 @@ const ProductionManagementPage = () => {
                         ) : (
                           <p className="text-sm text-gray-500">Aucun rapport disponible</p>
                         )}
-                        
-                        {/* Formulaire de nouveau rapport */}
-                        <div className="border rounded-md p-4 bg-gray-50 mt-6">
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">
-                            Ajouter un rapport journalier
-                          </h4>
-                          
-                          <div className="space-y-3">
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700">
-                                Quantité produite
-                              </label>
-                              <input
-                                type="number"
-                                value={newReport.quantityProduced}
-                                onChange={(e) => setNewReport({...newReport, quantityProduced: parseInt(e.target.value) || 0})}
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700">
-                                Temps d'arrêt machine (minutes)
-                              </label>
-                              <input
-                                type="number"
-                                value={newReport.machineDowntime}
-                                onChange={(e) => setNewReport({...newReport, machineDowntime: parseInt(e.target.value) || 0})}
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700">
-                                Problèmes rencontrés (un par ligne)
-                              </label>
-                              <textarea
-                                value={newReport.issues}
-                                onChange={(e) => setNewReport({...newReport, issues: e.target.value})}
-                                rows={3}
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700">
-                                Observations
-                              </label>
-                              <textarea
-                                value={newReport.observations}
-                                onChange={(e) => setNewReport({...newReport, observations: e.target.value})}
-                                rows={2}
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                              />
-                            </div>
-                            
-                            <button
-                              onClick={() => addDailyReport(selectedOrder.id)}
-                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-                            >
-                              <PlusCircle className="h-3 w-3 mr-1" />
-                              Ajouter rapport
-                            </button>
-                          </div>
-                        </div>
                       </div>
                       
                       {/* Statistiques */}

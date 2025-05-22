@@ -18,8 +18,8 @@ import {
   Legend,
   ArcElement
 } from "chart.js";
-import Sidebar from "../../componentApprovisionnement/Sidebar";
-import Header from "../../componentApprovisionnement/Header";
+import Sidebar from "../../componentApprovisionnement/sidebar";
+import Header from "../../componentApprovisionnement/header";
 
 ChartJS.register(
   CategoryScale,

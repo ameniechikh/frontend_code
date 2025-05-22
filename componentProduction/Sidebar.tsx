@@ -33,9 +33,8 @@ const SidebarProduction = () => {
     {
       href: "/AgentProduction/SuiviProduction",
       icon: Wrench, // 🛠️ Gérer la production
-      label: "Gérer la production",
-      aria: "Gérer la production"
-    },
+      label: "Suivre l’état de production",
+      aria: "Suivre l’état de production"},
     {
       href: "/AgentProduction/GestionProduitsFinis",
       icon: PackageCheck, // 📦 Gérer produits finis

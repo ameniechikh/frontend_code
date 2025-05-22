@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Sidebar from "../../componentApprovisionnement/Sidebar";
-import Header from "../../componentApprovisionnement/Header";
+import Sidebar from "../../componentApprovisionnement/sidebar";
+import Header from "../../componentApprovisionnement/header";
 import { Package, Plus, Edit, Trash2, Tag, Search, Save, X } from "lucide-react";
 import Button from "../../componentFournisseur/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
@@ -9,7 +9,7 @@ const initialSuppliers = [
   {
     id: "FR001",
     companyName: "Global Fer Distribution",
-    contact: "Ahmed Trabelsi",
+    
     email: "fer@global.com",
     phone: "+216 XX XXX XXX",
     status: "Actif",
@@ -25,7 +25,7 @@ const GestionFournisseurs = () => {
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [newSupplier, setNewSupplier] = useState({
     companyName: "",
-    contact: "",
+   
     email: "",
     phone: "",
     status: "Actif",
@@ -49,7 +49,7 @@ const GestionFournisseurs = () => {
     setEditingSupplier(null);
     setNewSupplier({
       companyName: "",
-      contact: "",
+      
       email: "",
       phone: "",
       status: "Actif",
@@ -121,7 +121,7 @@ const GestionFournisseurs = () => {
                     <tr className="bg-gray-100 text-left">
                       <th className="p-3">ID</th>
                       <th className="p-3">Nom société</th>
-                      <th className="p-3">Contact</th>
+                     
                       <th className="p-3">Email</th>
                       <th className="p-3">Téléphone</th>
                       <th className="p-3">Statut</th>
@@ -134,7 +134,7 @@ const GestionFournisseurs = () => {
                       <tr key={supplier.id} className="border-b hover:bg-gray-50">
                         <td className="p-3 font-medium">{supplier.id}</td>
                         <td className="p-3">{supplier.companyName}</td>
-                        <td className="p-3">{supplier.contact}</td>
+                       
                         <td className="p-3">{supplier.email}</td>
                         <td className="p-3">{supplier.phone}</td>
                         <td className="p-3">{supplier.status}</td>
@@ -192,15 +192,7 @@ const GestionFournisseurs = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label>Contact</label>
-                  <input
-                    type="text"
-                    value={newSupplier.contact}
-                    onChange={(e) => handleInputChange("contact", e.target.value)}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
+               
 
                 <div className="space-y-2">
                   <label>Email</label>

@@ -15,7 +15,7 @@ const Sidebar = () => {
   const [activeTab, setActiveTab] = useState("stock");
 
   return (
-    <div className="h-screen w-64 bg-gray-900 text-white flex flex-col p-4">
+    <div className="h-screen w-64 bg-black text-white flex flex-col p-4">
       {/* Logo circulaire */}
       <div className="flex items-center justify-center mb-8">
         <div className="h-20 w-20 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg">

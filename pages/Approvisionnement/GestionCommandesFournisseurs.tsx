@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../../componentApprovisionnement/Sidebar";
-import Header from "../../componentApprovisionnement/Header";
-import { Save, X, FileText, AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/card";
+import Sidebar from "../../componentApprovisionnement/sidebar";
+import Header from "../../componentApprovisionnement/header";
+import { Save, X, AlertTriangle, CheckCircle, Clock, Edit2 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "../../componentFournisseur/card"; // Added CardContent
 import Button from "../../componentFournisseur/button";
 import Select from 'react-select';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-// Données initiales
+// Données initiales (unchanged)
 const rawMaterials = [
   { value: 'acier_brut', label: 'Acier brut', suppliers: ['metal_nord', 'steelcorp'], stock: 1500 },
   { value: 'fer_barres', label: 'Fer en barres', suppliers: ['global_fer'], stock: 800 },
@@ -24,7 +24,6 @@ const suppliers = [
 ];
 
 const CommandeFournisseur = () => {
-  // États pour le formulaire
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [orderDetails, setOrderDetails] = useState({
@@ -33,13 +32,11 @@ const CommandeFournisseur = () => {
     notes: ''
   });
   const [showAlert, setShowAlert] = useState(false);
-  
-  // États pour la liste des commandes
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('new');
   const [orderIdCounter, setOrderIdCounter] = useState(1);
+  const [editingOrderId, setEditingOrderId] = useState(null);
 
-  // Vérification des incompatibilités
   useEffect(() => {
     const incompatibleMaterials = selectedMaterials.filter(material => 
       !selectedSupplier?.materials.includes(material.value)
@@ -47,16 +44,14 @@ const CommandeFournisseur = () => {
     setShowAlert(incompatibleMaterials.length > 0);
   }, [selectedMaterials, selectedSupplier]);
 
-  // Gestion des matières sélectionnées
   const handleMaterialChange = (selectedOptions) => {
     setSelectedMaterials(selectedOptions.map(option => ({
       ...option,
-      quantity: '',
-      unit: 'kg'
+      quantity: option.quantity || '',
+      unit: option.unit || 'kg'
     })));
   };
 
-  // Gestion du fournisseur sélectionné
   const handleSupplierChange = (selectedOption) => {
     setSelectedSupplier(selectedOption);
     setSelectedMaterials(prev => prev.filter(m => 
@@ -64,32 +59,42 @@ const CommandeFournisseur = () => {
     ));
   };
 
-  // Mise à jour des champs matière
   const updateMaterialField = (index, field, value) => {
     const updatedMaterials = [...selectedMaterials];
     updatedMaterials[index][field] = value;
     setSelectedMaterials(updatedMaterials);
   };
 
-  // Soumission de la commande
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    const newOrder = {
-      id: `CMD-${new Date().getFullYear()}-${orderIdCounter.toString().padStart(4, '0')}`,
-      supplier: selectedSupplier,
-      materials: selectedMaterials,
-      date: new Date().toISOString().split('T')[0],
-      deliveryDate: orderDetails.deliveryDate,
-      priority: orderDetails.priority,
-      notes: orderDetails.notes,
-      status: 'En attente de confirmation'
-    };
+    if (editingOrderId) {
+      setOrders(orders.map(order => 
+        order.id === editingOrderId ? {
+          ...order,
+          supplier: selectedSupplier,
+          materials: selectedMaterials,
+          deliveryDate: orderDetails.deliveryDate,
+          priority: orderDetails.priority,
+          notes: orderDetails.notes
+        } : order
+      ));
+      setEditingOrderId(null);
+    } else {
+      const newOrder = {
+        id: `CMD-${new Date().getFullYear()}-${orderIdCounter.toString().padStart(4, '0')}`,
+        supplier: selectedSupplier,
+        materials: selectedMaterials,
+        date: new Date().toISOString().split('T')[0],
+        deliveryDate: orderDetails.deliveryDate,
+        priority: orderDetails.priority,
+        notes: orderDetails.notes,
+        status: 'En attente de confirmation'
+      };
+      setOrders([...orders, newOrder]);
+      setOrderIdCounter(orderIdCounter + 1);
+    }
 
-    setOrders([...orders, newOrder]);
-    setOrderIdCounter(orderIdCounter + 1);
-    
-    // Réinitialisation du formulaire
     setSelectedMaterials([]);
     setSelectedSupplier(null);
     setOrderDetails({
@@ -97,15 +102,25 @@ const CommandeFournisseur = () => {
       priority: 'medium',
       notes: ''
     });
-    
     setActiveTab('list');
   };
 
-  // Changement de statut de la commande
   const updateOrderStatus = (orderId, newStatus) => {
     setOrders(orders.map(order => 
       order.id === orderId ? { ...order, status: newStatus } : order
     ));
+  };
+
+  const handleEditOrder = (order) => {
+    setEditingOrderId(order.id);
+    setSelectedSupplier(order.supplier);
+    setSelectedMaterials(order.materials);
+    setOrderDetails({
+      deliveryDate: order.deliveryDate,
+      priority: order.priority,
+      notes: order.notes
+    });
+    setActiveTab('new');
   };
 
   return (
@@ -121,9 +136,9 @@ const CommandeFournisseur = () => {
           <div className="flex border-b mb-6">
             <button
               className={`px-4 py-2 font-medium ${activeTab === 'new' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`}
-              onClick={() => setActiveTab('new')}
+              onClick={() => { setActiveTab('new'); setEditingOrderId(null); }}
             >
-              Nouvelle commande
+              {editingOrderId ? 'Modifier la commande' : 'Nouvelle commande'}
             </button>
             <button
               className={`px-4 py-2 font-medium ${activeTab === 'list' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`}
@@ -137,7 +152,7 @@ const CommandeFournisseur = () => {
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  📦 Nouvelle commande fournisseur
+                  📦 {editingOrderId ? `Modifier la commande ${editingOrderId}` : 'Nouvelle commande fournisseur'}
                 </CardTitle>
               </CardHeader>
 
@@ -172,7 +187,7 @@ const CommandeFournisseur = () => {
                         <span className="text-gray-700 mb-2 block">Délai de livraison *</span>
                         <DatePicker
                           selected={orderDetails.deliveryDate}
-                          onChange={(date) => setOrderDetails({...orderDetails, deliveryDate: date})}
+                          onChange={(date) => setOrderDetails({ ...orderDetails, deliveryDate: date })}
                           minDate={new Date()}
                           className="w-full p-2 border rounded"
                           placeholderText="Sélectionner une date"
@@ -185,7 +200,7 @@ const CommandeFournisseur = () => {
                         <select
                           className="w-full p-2 border rounded"
                           value={orderDetails.priority}
-                          onChange={(e) => setOrderDetails({...orderDetails, priority: e.target.value})}
+                          onChange={(e) => setOrderDetails({ ...orderDetails, priority: e.target.value })}
                         >
                           <option value="high">Haute</option>
                           <option value="medium">Moyenne</option>
@@ -254,7 +269,7 @@ const CommandeFournisseur = () => {
                     <textarea
                       className="w-full p-2 border rounded h-24"
                       value={orderDetails.notes}
-                      onChange={(e) => setOrderDetails({...orderDetails, notes: e.target.value})}
+                      onChange={(e) => setOrderDetails({ ...orderDetails, notes: e.target.value })}
                       placeholder="Informations complémentaires..."
                     />
                   </label>
@@ -264,6 +279,17 @@ const CommandeFournisseur = () => {
                       type="button"
                       variant="secondary"
                       className="flex items-center gap-2"
+                      onClick={() => {
+                        setEditingOrderId(null);
+                        setSelectedMaterials([]);
+                        setSelectedSupplier(null);
+                        setOrderDetails({
+                          deliveryDate: null,
+                          priority: 'medium',
+                          notes: ''
+                        });
+                        setActiveTab('list');
+                      }}
                     >
                       <X size={18} /> Annuler
                     </Button>
@@ -274,7 +300,7 @@ const CommandeFournisseur = () => {
                       className="flex items-center gap-2"
                       disabled={!selectedSupplier || selectedMaterials.length === 0}
                     >
-                      <Save size={18} /> Envoyer la commande
+                      <Save size={18} /> {editingOrderId ? 'Enregistrer les modifications' : 'Envoyer la commande'}
                     </Button>
                   </div>
                 </form>
@@ -358,14 +384,15 @@ const CommandeFournisseur = () => {
                                   >
                                     Annuler
                                   </Button>
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => handleEditOrder(order)}
+                                  >
+                                    <Edit2 size={16} className="mr-1" /> Modifier
+                                  </Button>
                                 </>
                               )}
-                              <Button
-                                variant="primary"
-                                size="sm"
-                              >
-                                <FileText size={16} className="mr-1" /> PDF
-                              </Button>
                             </td>
                           </tr>
                         ))}

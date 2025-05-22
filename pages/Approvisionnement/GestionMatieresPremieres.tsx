@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Search, Package, Filter, Plus, Trash2, Edit } from "lucide-react";
-import SidebarApprovisionnement from "../../componentApprovisionnement/Sidebar";
-import HeaderApprovisionnement from "../../componentApprovisionnement/Header";
+import SidebarApprovisionnement from "../../componentApprovisionnement/sidebar";
+import HeaderApprovisionnement from "../../componentApprovisionnement/header";
 import { Card, CardContent, CardHeader, CardTitle } from "../../componentFournisseur/Card";
 import Button from "../../componentFournisseur/Button";
 
@@ -15,17 +15,15 @@ interface RawMaterial {
   description?: string;
   quantityAvailable: number;
   dateAdded: Date;
+  status: "en attente" | "validée";
 }
 
 const GestionMatieresPremieres = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState({
-    date: ""
-  });
+  const [filters, setFilters] = useState({ date: "" });
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<RawMaterial | null>(null);
-  
-  // Données de démonstration
+
   const [materials, setMaterials] = useState<RawMaterial[]>([
     {
       id: 1,
@@ -36,6 +34,7 @@ const GestionMatieresPremieres = () => {
       minThreshold: 100,
       quantityAvailable: 150,
       dateAdded: new Date("2024-01-15"),
+      status: "validée",
     },
     {
       id: 2,
@@ -45,14 +44,16 @@ const GestionMatieresPremieres = () => {
       minThreshold: 5,
       quantityAvailable: 3,
       dateAdded: new Date("2024-02-01"),
+      status: "en attente",
     },
   ]);
 
   const filteredMaterials = materials.filter(material => {
-    const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         material.code.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const materialDate = new Date(material.dateAdded).toISOString().split('T')[0];
+    const matchesSearch =
+      material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      material.code.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const materialDate = new Date(material.dateAdded).toISOString().split("T")[0];
     const matchesDate = filters.date ? materialDate === filters.date : true;
 
     return matchesSearch && matchesDate;
@@ -61,31 +62,40 @@ const GestionMatieresPremieres = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget as HTMLFormElement);
-    
+
     const newMaterial: RawMaterial = {
       id: editingMaterial ? editingMaterial.id : materials.length + 1,
-      name: formData.get('name') as string,
-      code: formData.get('code') as string,
-      unit: formData.get('unit') as string,
-      unitPrice: formData.get('unitPrice') ? Number(formData.get('unitPrice')) : undefined,
-      minThreshold: Number(formData.get('minThreshold')),
-      description: formData.get('description') as string || undefined,
+      name: formData.get("name") as string,
+      code: formData.get("code") as string,
+      unit: formData.get("unit") as string,
+      unitPrice: formData.get("unitPrice") ? Number(formData.get("unitPrice")) : undefined,
+      minThreshold: Number(formData.get("minThreshold")),
+      description: formData.get("description") as string || undefined,
       quantityAvailable: editingMaterial ? editingMaterial.quantityAvailable : 0,
       dateAdded: editingMaterial ? editingMaterial.dateAdded : new Date(),
+      status: editingMaterial ? editingMaterial.status : "en attente",
     };
 
     if (editingMaterial) {
-      setMaterials(materials.map(m => m.id === editingMaterial.id ? newMaterial : m));
+      setMaterials(materials.map(m => (m.id === editingMaterial.id ? newMaterial : m)));
     } else {
       setMaterials([...materials, newMaterial]);
     }
-    
+
     setShowAddModal(false);
     setEditingMaterial(null);
   };
 
   const handleDelete = (id: number) => {
     setMaterials(materials.filter(m => m.id !== id));
+  };
+
+  const handleValidateReception = (id: number) => {
+    setMaterials(prev =>
+      prev.map(material =>
+        material.id === id ? { ...material, status: "validée" } : material
+      )
+    );
   };
 
   return (
@@ -104,14 +114,14 @@ const GestionMatieresPremieres = () => {
             <Card>
               <CardContent className="space-y-4 p-6">
                 <div className="flex items-center gap-4">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     onClick={() => setShowAddModal(true)}
                     className="mr-auto"
                   >
                     <Plus className="mr-2" /> Ajouter matière première
                   </Button>
-                  
+
                   <Search className="text-gray-400" />
                   <input
                     type="text"
@@ -120,12 +130,12 @@ const GestionMatieresPremieres = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  
+
                   <input
                     type="date"
                     className="p-2 border rounded-lg"
                     value={filters.date}
-                    onChange={(e) => setFilters({...filters, date: e.target.value})}
+                    onChange={(e) => setFilters({ ...filters, date: e.target.value })}
                   />
                 </div>
               </CardContent>
@@ -147,15 +157,16 @@ const GestionMatieresPremieres = () => {
                       <th className="p-3">Seuil min</th>
                       <th className="p-3">Unité</th>
                       <th className="p-3">Date</th>
+                      <th className="p-3">Statut</th>
                       <th className="p-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredMaterials.map(material => (
-                      <tr 
-                        key={material.id} 
+                      <tr
+                        key={material.id}
                         className={`border-b hover:bg-gray-50 ${
-                          material.quantityAvailable < material.minThreshold ? 'bg-red-50' : ''
+                          material.quantityAvailable < material.minThreshold ? "bg-red-50" : ""
                         }`}
                       >
                         <td className="p-3">{material.code}</td>
@@ -164,21 +175,41 @@ const GestionMatieresPremieres = () => {
                         <td className="p-3">{material.minThreshold}</td>
                         <td className="p-3">{material.unit}</td>
                         <td className="p-3">{material.dateAdded.toLocaleDateString()}</td>
-                        <td className="p-3 flex gap-2">
-                          <Button 
-                            variant="outline" 
+                        <td className="p-3">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              material.status === "validée"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {material.status}
+                          </span>
+                        </td>
+                        <td className="p-3 flex gap-2 flex-wrap">
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => setEditingMaterial(material)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="destructive" 
+                          <Button
+                            variant="destructive"
                             size="sm"
                             onClick={() => handleDelete(material.id)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                           </Button>
+                          {material.status !== "validée" && (
+                            <Button
+                              variant="success"
+                              size="sm"
+                              onClick={() => handleValidateReception(material.id)}
+                            >
+                              Valider
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -193,7 +224,7 @@ const GestionMatieresPremieres = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg w-full max-w-md">
               <h3 className="text-xl font-semibold mb-4">
-                {editingMaterial ? 'Modifier Matière' : 'Ajouter Matière Première'}
+                {editingMaterial ? "Modifier Matière" : "Ajouter Matière Première"}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -205,7 +236,7 @@ const GestionMatieresPremieres = () => {
                     defaultValue={editingMaterial?.name}
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium mb-1">Code *</label>
                   <input
@@ -232,7 +263,9 @@ const GestionMatieresPremieres = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Prix unitaire (optionnel)</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Prix unitaire (optionnel)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -254,7 +287,9 @@ const GestionMatieresPremieres = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Description (optionnel)</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Description (optionnel)
+                  </label>
                   <textarea
                     name="description"
                     className="w-full p-2 border rounded-lg"
@@ -264,8 +299,8 @@ const GestionMatieresPremieres = () => {
                 </div>
 
                 <div className="flex gap-2 justify-end mt-6">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       setShowAddModal(false);
                       setEditingMaterial(null);

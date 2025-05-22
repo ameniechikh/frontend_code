@@ -55,7 +55,7 @@ const AuthFournisseur = () => {
           {isSignup && (
             <>
               <div>
-                <label className="block text-sm font-semibold text-gray-700">Raison sociale</label>
+                <label className="block text-sm font-semibold text-gray-700">nom</label>
                 <input
                   type="text"
                   name="company"
@@ -65,7 +65,7 @@ const AuthFournisseur = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700">SIRET</label>
+                <label className="block text-sm font-semibold text-gray-700">prenom</label>
                 <input
                   type="text"
                   name="siret"

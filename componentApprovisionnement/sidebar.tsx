@@ -29,7 +29,7 @@ const Sidebar = () => {
         <Link href="/Approvisionnement/GestionMatieresPremieres">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <Boxes className="w-5 h-5" />
-            <span>Gestion des matières premières</span>
+            <span>Gérer  matières premières</span>
           </div>
         </Link>
 
@@ -38,7 +38,7 @@ const Sidebar = () => {
         <Link href="/Approvisionnement/ReceptionStock">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <FileText className="w-5 h-5" />
-            <span>Gérer le Stock d’Entrée</span>
+            <span>Suivre réception stock </span>
           </div>
         </Link>
 
@@ -47,7 +47,7 @@ const Sidebar = () => {
         <Link href="/Approvisionnement/GestionCommandesFournisseurs">
           <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer">
             <ListOrdered className="w-5 h-5" />
-            <span>Gestion Commandes Fournisseurs</span>
+            <span> Gère matière première</span>
           </div>
         </Link> 
         

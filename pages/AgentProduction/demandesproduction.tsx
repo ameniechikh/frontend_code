@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import {
   Package, ClipboardList, PlusCircle, Calendar, 
-  Flag, FileText, Paperclip, Send, Eye, Trash2, 
+  Flag, FileText, Paperclip, Send, Trash2, 
   CheckCircle, Clock, Zap, Settings, Factory, X,
-  ChevronDown, Search, Filter, Download
+  ChevronDown, Search, Filter, Download, Eye,AlertTriangle
 } from "lucide-react";
 import Sidebar from "../../componentProduction/Sidebar";
 import Header from "../../componentProduction/Header";
@@ -20,6 +20,7 @@ interface ProductionRequest {
   attachments: string[];
   status: "Envoyée" | "Acceptée" | "En cours" | "Terminée" | "Annulée";
   requestDate: Date;
+  rawMaterials: string[];
 }
 
 const initialProductionRequest: ProductionRequest = {
@@ -32,6 +33,7 @@ const initialProductionRequest: ProductionRequest = {
   attachments: [],
   status: "Envoyée",
   requestDate: new Date(),
+  rawMaterials: [],
 };
 
 const DUMMY_PRODUCTS = [
@@ -39,6 +41,46 @@ const DUMMY_PRODUCTS = [
   "Module sans fil BX-450", 
   "Capteur de température CT-100", 
   "Alimentation 12V 5A"
+];
+
+const PRODUCT_MATERIALS: { [key: string]: string[] } = {
+  "Boîtier électronique AX-200": [
+    "Plastique ABS",
+    "Circuit imprimé",
+    "Vis M3",
+    "Écrou M3"
+  ],
+  "Module sans fil BX-450": [
+    "Circuit imprimé",
+    "Microcontrôleur",
+    "Résistance 1kΩ",
+    "Condensateur 10μF"
+  ],
+  "Capteur de température CT-100": [
+    "Circuit imprimé",
+    "Microcontrôleur",
+    "LED",
+    "Batterie"
+  ],
+  "Alimentation 12V 5A": [
+    "Circuit imprimé",
+    "Câble USB",
+    "Condensateur 10μF",
+    "Résistance 1kΩ"
+  ]
+};
+
+const AVAILABLE_RAW_MATERIALS = [
+  "Plastique ABS",
+  "Circuit imprimé",
+  "Résistance 1kΩ",
+  "Condensateur 10μF",
+  "Microcontrôleur",
+  "LED",
+  "Batterie",
+  "Câble USB",
+  "Vis M3",
+  "Écrou M3",
 ];
 
 const statusOptions = ["Envoyée", "Acceptée", "En cours", "Terminée", "Annulée"];
@@ -83,11 +125,13 @@ const ProductionRequestPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [priorityFilter, setPriorityFilter] = useState<string>("");
+  const [selectedMaterial, setSelectedMaterial] = useState("");
+  const [unavailableMaterials, setUnavailableMaterials] = useState<string[]>([]);
 
-  // Fonctions de gestion du formulaire
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setProductionRequest({ ...productionRequest, [name]: value });
+    setSelectedMaterial("");
   };
 
   const handleDateChange = (date: Date) => {
@@ -110,6 +154,30 @@ const ProductionRequestPage = () => {
     setProductionRequest({ ...productionRequest, attachments: updatedAttachments });
   };
 
+  const addSelectedMaterial = () => {
+    if (!selectedMaterial) {
+      alert("Veuillez sélectionner une matière première.");
+      return;
+    }
+
+    if (!AVAILABLE_RAW_MATERIALS.includes(selectedMaterial)) {
+      setUnavailableMaterials([selectedMaterial]);
+      notifyProcurementAgent([selectedMaterial]);
+    } else {
+      setProductionRequest({
+        ...productionRequest,
+        rawMaterials: [...productionRequest.rawMaterials, selectedMaterial]
+      });
+      setUnavailableMaterials([]);
+    }
+    setSelectedMaterial("");
+  };
+
+  const notifyProcurementAgent = (materials: string[]) => {
+    console.log(`Notification envoyée à l'agent d'approvisionnement : Commander les matières suivantes : ${materials.join(', ')}`);
+    alert(`Notification envoyée à l'agent d'approvisionnement pour commander : ${materials.join(', ')}`);
+  };
+
   const submitRequest = () => {
     if (!productionRequest.product || productionRequest.quantity <= 0 || !productionRequest.desiredDate) {
       alert("Veuillez remplir tous les champs obligatoires");
@@ -126,9 +194,9 @@ const ProductionRequestPage = () => {
     setRequests([newRequest, ...requests]);
     setProductionRequest(initialProductionRequest);
     setActiveTab("history");
+    setSelectedMaterial("");
   };
 
-  // Fonctions de gestion de l'historique
   const viewRequestDetails = (request: ProductionRequest) => {
     setSelectedRequest(request);
     setIsModalOpen(true);
@@ -147,7 +215,6 @@ const ProductionRequestPage = () => {
     setSelectedRequest(null);
   };
 
-  // Filtrage des demandes
   const filteredRequests = requests.filter(request => {
     const matchesSearch = request.product.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          request.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -165,7 +232,6 @@ const ProductionRequestPage = () => {
         <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
         <main className="p-6 mt-16">
-          {/* Navigation par onglets */}
           <div className="flex border-b border-gray-200 mb-6">
             <button
               onClick={() => setActiveTab("new")}
@@ -191,29 +257,25 @@ const ProductionRequestPage = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Produit */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 flex items-center">
                     <Package className="h-4 w-4 mr-2 text-gray-500" />
                     Produit fini à fabriquer *
                   </label>
-                  <div className="relative">
-                    <select
-                      name="product"
-                      value={productionRequest.product}
-                      onChange={handleInputChange}
-                      className="block w-full pl-9 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      required
-                    >
-                      <option value="">Sélectionnez un produit</option>
-                      {DUMMY_PRODUCTS.map(product => (
-                        <option key={product} value={product}>{product}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <select
+                    name="product"
+                    value={productionRequest.product}
+                    onChange={handleInputChange}
+                    className="block w-full pl-9 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    required
+                  >
+                    <option value="">Sélectionnez un produit</option>
+                    {DUMMY_PRODUCTS.map(product => (
+                      <option key={product} value={product}>{product}</option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Quantité */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 flex items-center">
                     <ClipboardList className="h-4 w-4 mr-2 text-gray-500" />
@@ -232,7 +294,6 @@ const ProductionRequestPage = () => {
                   </div>
                 </div>
 
-                {/* Date souhaitée */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-gray-500" />
@@ -249,7 +310,6 @@ const ProductionRequestPage = () => {
                   </div>
                 </div>
 
-                {/* Priorité */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 flex items-center">
                     <Flag className="h-4 w-4 mr-2 text-gray-500" />
@@ -270,7 +330,55 @@ const ProductionRequestPage = () => {
                 </div>
               </div>
 
-              {/* Notes */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <FileText className="h-4 w-4 mr-2 text-gray-500" />
+                  Sélectionner une matière première
+                </label>
+                {productionRequest.product ? (
+                  <div className="flex gap-2">
+                    <select
+                      value={selectedMaterial}
+                      onChange={(e) => setSelectedMaterial(e.target.value)}
+                      className="flex-1 block pl-9 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="">Choisir une matière</option>
+                      {PRODUCT_MATERIALS[productionRequest.product].map((material) => (
+                        <option key={material} value={material}>{material}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={addSelectedMaterial}
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <PlusCircle className="h-4 w-4 mr-1" />
+                      Ajouter
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">Veuillez sélectionner un produit pour voir les matières nécessaires.</p>
+                )}
+                {unavailableMaterials.length > 0 && (
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md flex items-center text-red-700">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    <p className="text-sm">
+                      Matière non disponible : {unavailableMaterials.join(', ')}. Une notification a été envoyée à l'agent d'approvisionnement.
+                    </p>
+                  </div>
+                )}
+                {productionRequest.rawMaterials.length > 0 && (
+                  <div className="mt-2">
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">Matières ajoutées :</h4>
+                    <ul className="list-disc pl-5 text-sm text-gray-700">
+                      {productionRequest.rawMaterials.map((material, index) => (
+                        <li key={index}>{material}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   <FileText className="h-4 w-4 mr-2 text-gray-500" />
@@ -286,7 +394,6 @@ const ProductionRequestPage = () => {
                 />
               </div>
 
-              {/* Pièces jointes */}
               <div className="mb-8">
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   <Paperclip className="h-4 w-4 mr-2 text-gray-500" />
@@ -332,7 +439,6 @@ const ProductionRequestPage = () => {
                 )}
               </div>
 
-              {/* Bouton de soumission */}
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -346,7 +452,6 @@ const ProductionRequestPage = () => {
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              {/* Barre d'outils de l'historique */}
               <div className="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center">
                   <ClipboardList className="h-5 w-5 text-blue-500 mr-2" />
@@ -354,7 +459,6 @@ const ProductionRequestPage = () => {
                 </h2>
                 
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                  {/* Barre de recherche */}
                   <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Search className="h-4 w-4 text-gray-400" />
@@ -368,7 +472,6 @@ const ProductionRequestPage = () => {
                     />
                   </div>
                   
-                  {/* Filtres */}
                   <div className="flex gap-2">
                     <div className="relative">
                       <select
@@ -405,7 +508,6 @@ const ProductionRequestPage = () => {
                 </div>
               </div>
               
-              {/* Tableau des demandes */}
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -494,7 +596,6 @@ const ProductionRequestPage = () => {
             </div>
           )}
 
-          {/* Modal de détails */}
           {isModalOpen && selectedRequest && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -554,6 +655,15 @@ const ProductionRequestPage = () => {
                           {statusIcons[selectedRequest.status]}
                           {selectedRequest.status}
                         </span>
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Matières premières</h4>
+                    <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                      <p className="text-sm text-gray-700">
+                        {selectedRequest.rawMaterials.length > 0 ? selectedRequest.rawMaterials.join(', ') : "Aucune matière première"}
                       </p>
                     </div>
                   </div>

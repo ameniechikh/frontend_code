@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const Sidebar = () => {
   return (
-    <aside className="w-64 bg-gray-900 text-white h-screen fixed left-0 top-0 p-5 z-50 shadow-2xl">
+    <aside className="w-64 bg-black text-white h-screen fixed left-0 top-0 p-5 z-50 shadow-2xl">
       {/* Logo circulaire */}
       <div className="mb-10 flex justify-center">
         <div className="p-2 bg-white rounded-full border-4 border-indigo-500 shadow-lg">
@@ -23,7 +23,7 @@ const Sidebar = () => {
       {/* Menu de navigation */}
       <nav className="flex flex-col space-y-2">
         <SidebarLink href="/client/home" label="Accueil" Icon={Home} />
-        <SidebarLink href="/client/Dashboard" label="Dashboard" Icon={LayoutDashboard} />
+        
         <SidebarLink href="/client/shop" label="Industria Fer" Icon={ShoppingCart} />
         <SidebarLink href="/client/OffresRecherche" label="Offres & Recherche" Icon={Tag} />
         <SidebarLink href="/client/account" label="Mon Compte" Icon={User} />

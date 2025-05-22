@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"; // Utilise next/navigation au lieu de next/router
+import axios from "axios";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,7 +13,6 @@ const AuthPage = () => {
     password: "",
     confirmPassword: ""
   });
-  const [captchaVerified, setCaptchaVerified] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
 
@@ -23,13 +23,25 @@ const AuthPage = () => {
     });
   };
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isLogin) {
       if (!formData.email || !formData.password) {
-        alert("Veuillez remplir tous les champs !");
+        setMessage("Veuillez remplir tous les champs !");
         return;
+      }
+
+      try {
+        const response = await axios.post("http://localhost:3000/login/client", {
+          email: formData.email,
+          password: formData.password
+        });
+        localStorage.setItem("token", response.data.token); // Stocker le token
+        setMessage("Connexion réussie !");
+        setTimeout(() => router.push("/shop"), 1500); // Rediriger vers /shop
+      } catch (err: any) {
+        setMessage(err.response?.data?.error || "Erreur lors de la connexion");
       }
     } else {
       const requiredFields = [
@@ -43,28 +55,33 @@ const AuthPage = () => {
       ];
 
       if (requiredFields.some(field => !field)) {
-        alert("Veuillez remplir tous les champs !");
+        setMessage("Veuillez remplir tous les champs !");
         return;
       }
 
       if (formData.password !== formData.confirmPassword) {
-        alert("Les mots de passe ne correspondent pas !");
+        setMessage("Les mots de passe ne correspondent pas !");
         return;
       }
 
-      if (!/^\d{10}$/.test(formData.phoneNumber)) {
-        alert("Numéro de téléphone invalide (10 chiffres requis)");
+      if (!/^\d{8}$/.test(formData.phoneNumber)) { // Ajusté à 8 chiffres
+        setMessage("Numéro de téléphone invalide (8 chiffres requis, par exemple : 22345678)");
         return;
+      }
+
+      try {
+        const response = await axios.post("http://localhost:3000/register", {
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phoneNumber,
+          name: `${formData.firstName} ${formData.lastName}`.trim()
+        });
+        setMessage("Inscription réussie !");
+        setTimeout(() => router.push("/login"), 1500); // Rediriger vers /login après inscription
+      } catch (err: any) {
+        setMessage(err.response?.data?.error || "Erreur lors de l'inscription");
       }
     }
-
-  
-
-    setMessage(isLogin ? "Connexion réussie !" : "Inscription réussie !");
-    
-    setTimeout(() => {
-      router.push("/client/home");
-    }, 1500);
   };
 
   return (
@@ -73,7 +90,7 @@ const AuthPage = () => {
         <h2 className="text-2xl font-bold text-center mb-4">
           {isLogin ? "Connexion" : "Inscription"}
         </h2>
-        {message && <p className="text-green-600 text-center">{message}</p>}
+        {message && <p className="text-center mb-4 text-red-600">{message}</p>}
         
         <form onSubmit={handleAuth} className="space-y-4">
           {!isLogin && (
@@ -122,8 +139,8 @@ const AuthPage = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
-                  pattern="\d{10}"
-                  title="10 chiffres requis"
+                  pattern="^\d{8}$"
+                  title="8 chiffres requis (par exemple : 0612345678)"
                   required
                   className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                 />
@@ -171,8 +188,6 @@ const AuthPage = () => {
             )}
           </div>
 
-         
-
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -191,22 +206,6 @@ const AuthPage = () => {
             </button>
           </div>
         )}
-
-        <div className="mt-4 space-y-2">
-          <button className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-2">
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.835 0 3.456.989 4.518 2.468l3.127-3.125A9.97 9.97 0 0012.545 2C7.021 2 2.545 6.477 2.545 12s4.476 10 10 10c5.523 0 10-4.477 10-10a9.94 9.94 0 00-1.818-5.761l-8.182 3.999z"/>
-            </svg>
-            Continuer avec Google
-          </button>
-          
-          <button className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-blue-900 transition flex items-center justify-center gap-2">
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.323-.593 1.323-1.325V1.325C24 .593 23.407 0 22.675 0z"/>
-            </svg>
-            Continuer avec Facebook
-          </button>
-        </div>
 
         <div className="text-center mt-4">
           <button

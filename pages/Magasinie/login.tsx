@@ -1,124 +1,60 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { Lock, User, Smartphone, AlertCircle } from "lucide-react";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [twoFactorCode, setTwoFactorCode] = useState("");
-  const [show2FA, setShow2FA] = useState(false);
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
-  const MAX_ATTEMPTS = 3;
-  const LOCK_TIMEOUT = 300000;
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLocked) {
-      setErrorMessage("Compte verrouillé");
-      return;
-    }
-
-    const isValid = username === "admin" && password === "admin123";
-    if (!isValid) {
-      const newAttempts = loginAttempts + 1;
-      setLoginAttempts(newAttempts);
-      if (newAttempts >= MAX_ATTEMPTS) {
-        setIsLocked(true);
-        setTimeout(() => setIsLocked(false), LOCK_TIMEOUT);
-        setErrorMessage("Compte verrouillé après 3 échecs");
-      } else {
-        setErrorMessage(`Identifiants incorrects (${MAX_ATTEMPTS - newAttempts} restantes)`);
-      }
-      return;
-    }
-
-    setShow2FA(true);
-  };
-
-  const handle2FASubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (twoFactorCode === "123456") {
-      window.location.href = "/Magasinie/DashboardStock";
+    if (email === "Magasinie@smartsteel.com" && password === "Magasine") {
+      router.push("/Magasinie/DashboardStock");
     } else {
-      setErrorMessage("Code incorrect");
+      alert("Email ou mot de passe incorrect !");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-blue-900 to-indigo-600 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-r animate-gradient-x from-blue-500 via-purple-500 to-pink-500 border-4 border-black shadow-2xl rounded-full p-10 w-[430px] h-[430px] flex flex-col justify-center items-center relative transition-all duration-1000">
-        <div className="w-full mt-4">
-          {!show2FA ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
-                <User className="absolute top-3 left-3 text-blue-900" />
-                <input
-                  type="text"
-                  placeholder="Nom d'utilisateur"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  className="pl-10 py-2 w-full rounded-full border border-blue-300 focus:ring-2 focus:ring-blue-600 outline-none"
-                />
-              </div>
+    <div className="flex items-center justify-center min-h-screen bg-[#DCE7FF]">
+      <div className="bg-white p-6 rounded-2xl shadow-lg flex w-[600px]">
+        {/* Image Section */}
+        <div className="w-1/2 flex justify-center items-center bg-gray-100 rounded-l-2xl">
+          <img src="/bb.jpg" alt="Login Illustration" className="w-150 h-150" />
+        </div>
 
-              <div className="relative">
-                <Lock className="absolute top-3 left-3 text-blue-900" />
-                <input
-                  type="password"
-                  placeholder="Mot de passe"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="pl-10 py-2 w-full rounded-full border border-blue-300 focus:ring-2 focus:ring-blue-600 outline-none"
-                />
-              </div>
-
-              {errorMessage && (
-                <div className="text-red-600 text-sm flex items-center gap-2">
-                  <AlertCircle size={16} /> {errorMessage}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLocked}
-                className="w-full bg-blue-800 text-white py-2 rounded-full hover:bg-blue-900 transition"
-              >
-                Connexion
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handle2FASubmit} className="space-y-4">
-              <div className="text-center">
-                <Smartphone className="mx-auto text-blue-800" size={30} />
-                <p className="text-gray-700 mt-2">Entrez le code 2FA</p>
-              </div>
+        {/* Form Section */}
+        <div className="w-1/2 p-6">
+          <h2 className="text-2xl font-bold text-center mb-2">Sign In</h2>
+         
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Email</label>
               <input
-                type="text"
-                maxLength={6}
-                placeholder="123456"
-                value={twoFactorCode}
-                onChange={(e) => setTwoFactorCode(e.target.value)}
-                className="text-center text-xl w-full border border-blue-300 py-2 rounded-full focus:ring-2 focus:ring-blue-600 outline-none"
+                type="email"
+                placeholder="Enter your email"
+                className="w-full p-2 border rounded mt-1"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              {errorMessage && (
-                <div className="text-red-600 text-sm flex items-center gap-2">
-                  <AlertCircle size={16} /> {errorMessage}
-                </div>
-              )}
-              <button
-                type="submit"
-                className="w-full bg-blue-800 text-white py-2 rounded-full hover:bg-blue-900 transition"
-              >
-                Vérifier
-              </button>
-            </form>
-          )}
+            </div>
+            <div>
+              <label className="text-sm font-medium">Password</label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                className="w-full p-2 border rounded mt-1"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
+              Sign In
+            </button>
+          </form>
+          <button className="w-full mt-3 border p-2 rounded"></button>
         </div>
       </div>
     </div>

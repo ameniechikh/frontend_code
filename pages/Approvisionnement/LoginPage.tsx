@@ -1,148 +1,64 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import { Lock, Mail, Smartphone, RotateCw } from 'lucide-react';
+import { useRouter } from "next/router";
+import { useState } from "react";
 
-const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('password');
+const Login = () => {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    try {
-      // Simulation d'appel API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Redirection après connexion réussie
-      router.push('/Approvisionnement/Dashboard');
-    } catch (err) {
-      setError('Échec de la connexion. Veuillez vérifier vos informations.');
-    } finally {
-      setIsLoading(false);
+    if (email === "Approvisionnement@smartsteel.com" && password === "Approvisionnement") {
+      router.push("/Approvisionnement/Dashboard");
+    } else {
+      alert("Email ou mot de passe incorrect !");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 space-y-6">
-        <div className="text-center">
-          <img 
-            src="/logo6.png" 
-            alt="SteelFlow Pro" 
-            className="h-20 w-20 mx-auto mb-4 rounded-full border-2 border-blue-500"
-          />
-          <h1 className="text-2xl font-bold text-white">Connexion </h1>
+    <div className="flex items-center justify-center min-h-screen bg-[#DCE7FF]">
+      <div className="bg-white p-6 rounded-2xl shadow-lg flex w-[600px]">
+        {/* Image Section */}
+        <div className="w-1/2 flex justify-center items-center bg-gray-100 rounded-l-2xl">
+          <img src="/bb.jpg" alt="Login Illustration" className="w-150 h-150" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Email professionnel
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+        {/* Form Section */}
+        <div className="w-1/2 p-6">
+          <h2 className="text-2xl font-bold text-center mb-2">Sign In</h2>
+         
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Email</label>
               <input
                 type="email"
+                placeholder="Enter your email"
+                className="w-full p-2 border rounded mt-1"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="contact@votresociete.com"
                 required
               />
             </div>
-          </div>
-
-          {loginMethod === 'password' ? (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Mot de passe
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
+              <label className="text-sm font-medium">Password</label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                className="w-full p-2 border rounded mt-1"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
-          ) : (
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Code OTP
-              </label>
-              <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="123456"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => setLoginMethod(prev => prev === 'password' ? 'otp' : 'password')}
-              className="text-sm text-blue-400 hover:text-blue-300"
-            >
-              {loginMethod === 'password' ? 'Utiliser OTP à la place' : 'Utiliser mot de passe'}
+            <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
+              Sign In
             </button>
-
-            {loginMethod === 'password' && (
-              <a 
-                href="/mot-de-passe-oublie" 
-                className="text-sm text-gray-400 hover:text-gray-300"
-              >
-                Mot de passe oublié ?
-              </a>
-            )}
-          </div>
-
-          {error && (
-            <div className="text-red-400 text-sm text-center">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center gap-2">
-                <RotateCw className="h-5 w-5 animate-spin" />
-                Connexion en cours...
-              </div>
-            ) : (
-              'Se connecter'
-            )}
-          </button>
-        </form>
-
-        <div className="text-center text-sm text-gray-400">
-          <p>Problèmes de connexion ? Contactez le support</p>
-          <p className="mt-2">support@steelflowpro.com</p>
+          </form>
+          <button className="w-full mt-3 border p-2 rounded"></button>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default Login;

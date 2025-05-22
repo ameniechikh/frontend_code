@@ -154,7 +154,7 @@ const GestionProduitsFinis = () => {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">Produits Finis</h1>
-              <p className="text-gray-600">Gestion des produits manufacturés</p>
+              
             </div>
             <div className="flex gap-3">
               <button 
@@ -167,10 +167,7 @@ const GestionProduitsFinis = () => {
                 <PlusCircle className="h-5 w-5" />
                 Ajouter un produit
               </button>
-              <button className="flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors">
-                <Download className="h-5 w-5" />
-                Exporter
-              </button>
+             
             </div>
           </div>
 
