@@ -166,15 +166,7 @@ const OffresRecherche = () => {
                   <option value="4.5">4.5★</option>
                 </select>
 
-                <label className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600"
-                    checked={filters.discountOnly}
-                    onChange={(e) => setFilters({ ...filters, discountOnly: e.target.checked })}
-                  />
-                  <span className="text-gray-700">Promotions uniquement</span>
-                </label>
+               
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

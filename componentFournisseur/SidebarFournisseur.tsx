@@ -8,14 +8,14 @@ const SidebarFournisseur = () => {
   const menuItems = [
     { name: "Tableau de Bord", path: "/Fournisseur/dashboard", icon: <LayoutDashboard size={20} /> },
     { name: "Catalogue matières premières", path: "/Fournisseur/catalogue", icon: <Package size={20} /> },
-    { name: "Historique Commandes", path: "/Fournisseur/Commandes", icon: <ClipboardList size={20} /> },
+    { name: "Historique Commandes", path: "/Fournisseur/commandes", icon: <ClipboardList size={20} /> },
     { name: "  Factures et Paiements", path: "/Fournisseur/factures", icon: <FileText size={20} /> },
     { name: "Messagerie", path: "/Fournisseur/messagerie", icon: <MessageSquare size={20} /> },
     { name: "Notifications", path: "/Fournisseur/Notifications", icon: <Bell size={20} /> },
   ];
 
   return (
-    <aside className="w-64 h-screen bg-gray-900 text-white flex flex-col shadow-lg">
+    <aside className="w-64 bg-black text-white h-screen fixed left-0 top-0 p-5 z-50 shadow-2xl">
       {/* Logo modifié */}
       <div className="p-6 flex items-center justify-center"> {/* Centrage ajouté */}
         <img 
