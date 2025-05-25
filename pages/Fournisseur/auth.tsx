@@ -14,7 +14,7 @@ const AuthFournisseur = () => {
 
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
@@ -22,7 +22,7 @@ const AuthFournisseur = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (isSignup && !formData.acceptTerms) {
       alert("Vous devez accepter les CGU pour créer un compte.");
@@ -33,79 +33,81 @@ const AuthFournisseur = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-200">
-      {/* Bannière Industrielle */}
-      <div
-        className="hidden md:flex flex-col justify-center items-center w-1/2 bg-cover bg-center text-white p-10 rounded-l-3xl shadow-lg"
-        style={{ backgroundImage: "url('/steel-factory.jpg')" }}
-      >
-        <h2 className="text-4xl font-bold mb-4 drop-shadow-lg">🏭 SteelFlow Pro</h2>
-        <p className="text-lg text-center max-w-md drop-shadow-md">
-          Optimisez vos approvisionnements en acier avec notre plateforme intelligente et moderne.
-        </p>
+    <div className="flex min-h-screen items-center justify-center bg-lime-100">
+      {/* Left Side - Illustration */}
+      <div className="hidden md:flex w-1/2 items-center justify-center bg-lime-200 p-10">
+        <img
+          src="/vel.jpg"
+          alt="Person working on a laptop"
+          className="w-3/4 h-3/4 object-contain"
+        />
       </div>
 
-      {/* Formulaire Auth */}
-      <div className="bg-white p-10 rounded-3xl shadow-xl w-full md:w-1/3 max-w-md">
-        <h2 className="text-3xl font-bold mb-6 text-center text-blue-700">
-          {isSignup ? "Créer un compte Fournisseur" : "Connexion Fournisseur"}
+      {/* Right Side - Form */}
+      <div className="bg-white p-10 rounded-lg shadow-lg w-full md:w-1/2 max-w-md flex flex-col justify-center h-screen">
+        <div className="flex justify-center mb-6">
+          
+        </div>
+
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          {isSignup ? "Create account" : "Connexion Fournisseur"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignup && (
             <>
               <div>
-                <label className="block text-sm font-semibold text-gray-700">nom</label>
+                <label className="block text-sm font-medium text-gray-700">Nom</label>
                 <input
                   type="text"
                   name="company"
                   onChange={handleChange}
                   required
-                  className="w-full p-3 border rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700">prenom</label>
+                <label className="block text-sm font-medium text-gray-700">Prenom</label>
                 <input
                   type="text"
                   name="siret"
                   onChange={handleChange}
                   required
-                  className="w-full p-3 border rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700">Téléphone</label>
+                <label className="block text-sm font-medium text-gray-700">Téléphone</label>
                 <input
                   type="text"
                   name="phone"
                   onChange={handleChange}
                   required
-                  className="w-full p-3 border rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500"
                 />
               </div>
             </>
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">Email address</label>
             <input
               type="email"
               name="email"
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700">Mot de passe</label>
+            <label className="block text-sm font-medium text-gray-700">Password</label>
             <input
               type="password"
               name="password"
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500"
             />
           </div>
 
@@ -118,9 +120,9 @@ const AuthFournisseur = () => {
                 className="mt-1"
               />
               <label className="text-sm text-gray-600">
-                J'accepte les{" "}
-                <a href="#" className="text-blue-500 hover:underline">
-                  Conditions Générales d'Utilisation
+                By creating an account you agree to SteelFlow Pro's{" "}
+                <a href="#" className="text-lime-600 hover:underline">
+                  Terms of Services & Privacy Policy
                 </a>
               </label>
             </div>
@@ -128,26 +130,41 @@ const AuthFournisseur = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl hover:bg-blue-700 transition"
+            className={`w-full ${
+              isSignup ? "bg-lime-600 hover:bg-lime-700" : "bg-purple-600 hover:bg-purple-700"
+            } text-white font-semibold py-3 rounded-lg transition`}
           >
-            {isSignup ? "S'inscrire" : "Se connecter"}
+            {isSignup ? "Create account" : "Se connecter"}
           </button>
         </form>
 
-        <div className="text-center mt-4">
-          <a href="#" className="text-sm text-blue-500 hover:underline">
-            Mot de passe oublié ?
-          </a>
-        </div>
-
-        <div className="text-center mt-4">
-          <button
-            onClick={() => setIsSignup(!isSignup)}
-            className="text-sm text-gray-600 hover:text-blue-600"
-          >
-            {isSignup ? "Déjà un compte ? Se connecter" : "Pas encore inscrit ? Créer un compte"}
-          </button>
-        </div>
+        {isSignup ? (
+          <div className="text-center mt-2">
+            <p className="text-xs text-gray-600">
+              Have an account?{" "}
+              <button
+                onClick={() => setIsSignup(!isSignup)}
+                className="text-lime-600 hover:underline text-xs"
+              >
+                Log in
+              </button>
+            </p>
+          </div>
+        ) : (
+          <div className="text-center mt-2">
+            <a href="#" className="text-xs text-lime-600 hover:underline">
+              Mot de passe oublié ?
+            </a>
+            <div className="mt-1">
+              <button
+                onClick={() => setIsSignup(!isSignup)}
+                className="text-xs text-gray-600 hover:text-lime-600"
+              >
+                Pas encore inscrit ? Créer un compte
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
